@@ -2,11 +2,36 @@ import pathlib
 
 BASE_DATA_DIR = (pathlib.Path(__file__).parent.parent / "data").resolve()
 SESSION_COOKIE_PATH = BASE_DATA_DIR / "session_cookie.secret"
+SESSION_COOKIE = SESSION_COOKIE_PATH.open().readlines()[0].strip()
+
+ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+NUMERIC = "0123456789"
 
 def _data_path(dayNum, year):
   p = BASE_DATA_DIR / str(year)
   p.mkdir(parents=True, exist_ok=True)
   return p / f"{dayNum}.input"
+
+def start_timer():
+  import time
+  start_time = time.perf_counter()
+  end_time = None
+  def stop_timer():
+    end_time = time.perf_counter()
+    return end_time - start_time
+  return stop_timer
+
+def submit_answer(dayNum, year, level, answer):
+  import subprocess
+  url = f"https://adventofcode.com/{year}/day/{dayNum}/answer"
+  cmd = f"curl '{url}' -H 'content-type: application/x-www-form-urlencoded' -H 'cookie: session={SESSION_COOKIE}' --data-raw 'level={level}&answer={answer}'"
+  proc = subprocess.run(cmd, capture_output=True, shell=True)
+  if b"not the right answer" in proc.stdout:
+    return False
+  elif b"That\'s the right answer" in proc.stdout:
+    return True
+  else:
+    return proc
 
 ### UTILS
 def get_input(dayNum, year=2020):
@@ -17,9 +42,8 @@ def get_input(dayNum, year=2020):
 
 def download_input(dayNum, year, data_file=None):
     import subprocess
-    session = SESSION_COOKIE_PATH.open().readlines()[0].strip()
     url = f"https://adventofcode.com/{year}/day/{dayNum}/input"
-    cmd = f"curl -H 'Cookie: session={session}' {url} > {data_file}"
+    cmd = f"curl -H 'Cookie: session={SESSION_COOKIE}' {url} > {data_file}"
     subprocess.run(cmd, capture_output=True, shell=True)
 
 def manhattan_distance(pointA,pointB):
