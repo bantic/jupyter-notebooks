@@ -1,5 +1,6 @@
 import pathlib
 import hashlib
+import re
 
 BASE_DATA_DIR = (pathlib.Path(__file__).parent.parent / "data").resolve()
 SESSION_COOKIE_PATH = BASE_DATA_DIR / "session_cookie.secret"
@@ -45,7 +46,7 @@ def submit_answer(dayNum, year, level, answer):
     cmd = f"curl '{url}' -H 'content-type: application/x-www-form-urlencoded' -H 'cookie: session={SESSION_COOKIE}' --data-raw 'level={level}&answer={answer}'"
     proc = subprocess.run(cmd, capture_output=True, shell=True)
     if b"not the right answer" in proc.stdout:
-        return False
+        return proc.stdout
     elif b"That\'s the right answer" in proc.stdout:
         return True
     else:
