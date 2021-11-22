@@ -152,3 +152,7 @@ def findindex(haystack, needle_fn):
 
 
 assert findindex([1, 2, 3, 4], lambda x: 8 - x == 4) == [1, 2, 3, 4].index(4)
+
+
+def mapints(s):
+    return map(int, re.findall(r"\d+", s))
