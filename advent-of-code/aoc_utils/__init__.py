@@ -72,6 +72,31 @@ def download_input(dayNum, year, data_file=None):
 def manhattan_distance(pointA, pointB):
     return abs(pointA[0] - pointB[0]) + abs(pointA[1] - pointB[1])
 
+def neighbors(point, only_positive=True, only_cardinal=True):
+  x,y = point
+  possible = [
+    (x+1,y),
+    (x-1,y),
+    (x,y+1),
+    (x,y-1)
+  ]
+  if not only_cardinal:
+    possible += [
+      (x+1,y+1),
+      (x+1,y-1),
+      (x-1,y+1),
+      (x-1,y-1),
+    ]
+  if only_positive:
+    possible = filter(lambda c: c[0]>=0 and c[1]>=0, possible)
+  return list(possible)
+
+assert sorted(neighbors( (0,0), only_positive=False, only_cardinal=True)) == [ (-1,0), (0,-1),(0,1),(1,0) ]
+assert sorted(neighbors( (0,0), only_positive=True, only_cardinal=True)) == [ (0,1), (1,0) ]
+assert sorted(neighbors( (1,1), only_positive=True, only_cardinal=True)) == [ (0,1), (1,0), (1,2), (2,1)]
+assert sorted(neighbors( (0,0), only_positive=False, only_cardinal=False)) == [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+assert sorted(neighbors( (0,0), only_positive=True, only_cardinal=False)) == [(0,1),(1,0),(1,1)]
+
 # input is e.g. [0,1,0,0]
 # output is e.g 0b0100 -> 4
 
@@ -155,4 +180,6 @@ assert findindex([1, 2, 3, 4], lambda x: 8 - x == 4) == [1, 2, 3, 4].index(4)
 
 
 def mapints(s):
-    return map(int, re.findall(r"\d+", s))
+    return list(map(int, re.findall(r"-?\d+", s)))
+
+getnums = mapints
