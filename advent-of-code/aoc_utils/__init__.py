@@ -206,3 +206,10 @@ def mul_inv(a, b):
         x0, x1 = x1 - q * x0, x0
     if x1 < 0: x1 += b0
     return x1
+
+# https://stackoverflow.com/questions/434287/what-is-the-most-pythonic-way-to-iterate-over-a-list-in-chunks
+def chunker(seq, size):
+    return (seq[pos:pos + size] for pos in range(0, len(seq), size))
+
+assert chunker([1,2,3,4],2) == [[1,2],[3,4]]
+assert chunker([1,2,3,4,5],2) == [[1,2],[3,4],[5]]
