@@ -1,6 +1,9 @@
 import pathlib
 import hashlib
 import re
+import math
+from functools import reduce
+
 
 BASE_DATA_DIR = (pathlib.Path(__file__).parent.parent / "data").resolve()
 SESSION_COOKIE_PATH = BASE_DATA_DIR / "session_cookie.secret"
@@ -181,5 +184,25 @@ assert findindex([1, 2, 3, 4], lambda x: 8 - x == 4) == [1, 2, 3, 4].index(4)
 
 def mapints(s):
     return list(map(int, re.findall(r"-?\d+", s)))
-
 getnums = mapints
+assert getnums("ab1sd3ghij-4") == [1,3,-4]
+
+def chinese_remainder(n, a):
+    sum = 0
+    prod = reduce(lambda a, b: a*b, n)
+    for n_i, a_i in zip(n, a):
+        p = prod // n_i
+        sum += a_i * mul_inv(p, n_i) * p
+    return sum % prod
+ 
+ 
+def mul_inv(a, b):
+    b0 = b
+    x0, x1 = 0, 1
+    if b == 1: return 1
+    while a > 1:
+        q = a // b
+        a, b = b, a%b
+        x0, x1 = x1 - q * x0, x0
+    if x1 < 0: x1 += b0
+    return x1
