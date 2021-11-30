@@ -211,5 +211,5 @@ def mul_inv(a, b):
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
 
-assert chunker([1,2,3,4],2) == [[1,2],[3,4]]
-assert chunker([1,2,3,4,5],2) == [[1,2],[3,4],[5]]
+assert list(chunker([1,2,3,4],2)) == [[1,2],[3,4]]
+assert list(chunker([1,2,3,4,5],2)) == [[1,2],[3,4],[5]]
