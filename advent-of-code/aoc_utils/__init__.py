@@ -153,6 +153,9 @@ def to_bin_bits(decimal, size=36):
 
 assert(to_bin_bits(11, 6) == [0, 0, 1, 0, 1, 1])
 
+def bin_to_decimal(bin_str):
+  return int(bin_str, 2)
+
 
 def split_list(seq, sep=''):
     chunk = []
