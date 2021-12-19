@@ -75,6 +75,29 @@ def download_input(dayNum, year, data_file=None):
 def manhattan_distance(pointA, pointB):
     return abs(pointA[0] - pointB[0]) + abs(pointA[1] - pointB[1])
 
+def manhattan_distance3d(a,b):
+  x1,y1,z1=a
+  x2,y2,z2=b
+  return abs(x1-x2) + abs(y1-y2) + abs(z1-z2)
+
+def dist3d(a,b):
+  x1,y1,z1=a
+  x2,y2,z2=b
+  return math.sqrt( (x2-x1)**2 + (y2-y1)**2 + (z2-z1)**2 )
+
+def add3d(a,b):
+  x,y,z=a
+  c,d,e=b
+  return (x+c,y+d,z+e)
+assert add3d((1,2,3),(4,5,6)) == (5, 7, 9)
+
+def sub3d(a,b):
+  x,y,z=a
+  c,d,e=b
+  return (x-c,y-d,z-e)
+assert sub3d((5,7,9),(4,5,6)) == (1,2,3)
+assert sub3d((0,2,0),(-5,0,0)) == (5,2,0)
+
 def neighbors(point, only_positive=True, only_cardinal=True):
   x,y = point
   possible = [
