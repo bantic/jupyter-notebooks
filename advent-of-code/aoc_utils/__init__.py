@@ -123,9 +123,27 @@ assert sorted(neighbors( (1,1), only_positive=True, only_cardinal=True)) == [ (0
 assert sorted(neighbors( (0,0), only_positive=False, only_cardinal=False)) == [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
 assert sorted(neighbors( (0,0), only_positive=True, only_cardinal=False)) == [(0,1),(1,0),(1,1)]
 
+def neighbors8(p, include_point=False):
+  x,y = p
+  res = [
+    (x-1,y-1),
+    (x,y-1),
+    (x+1,y-1),
+
+    (x-1,y),
+    (x,y), # p
+    (x+1,y),
+
+    (x-1,y+1),
+    (x,y+1),
+    (x+1,y+1),
+  ]
+  if not include_point:
+    res.remove(p)
+  return res
+
 # input is e.g. [0,1,0,0]
 # output is e.g 0b0100 -> 4
-
 
 def bits_to_int(bits):
     return int("0b" + "".join([str(b) for b in bits]), base=2)
