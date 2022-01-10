@@ -59,10 +59,10 @@ def submit_answer(dayNum, year, level, answer):
 
 
 def get_input(dayNum, year=2020):
-    data_file = _data_path(dayNum, year)
-    if not data_file.exists():
-        download_input(dayNum, year, data_file=data_file)
-    return [line.strip() for line in data_file.open().readlines()]
+  data_file = _data_path(dayNum, year)
+  if not data_file.exists():
+      download_input(dayNum, year, data_file=data_file)
+  return [line.strip() for line in data_file.open().readlines()]
 
 
 def download_input(dayNum, year, data_file=None):
@@ -79,6 +79,11 @@ def manhattan_distance3d(a,b):
   x1,y1,z1=a
   x2,y2,z2=b
   return abs(x1-x2) + abs(y1-y2) + abs(z1-z2)
+
+def euclid_dist(a,b):
+  x1,y1 = a
+  x2,y2 = b
+  return math.sqrt( (x2-x1)**2 + (y2-y1)**2 )
 
 def dist3d(a,b):
   x1,y1,z1=a
@@ -122,6 +127,8 @@ assert sorted(neighbors( (0,0), only_positive=True, only_cardinal=True)) == [ (0
 assert sorted(neighbors( (1,1), only_positive=True, only_cardinal=True)) == [ (0,1), (1,0), (1,2), (2,1)]
 assert sorted(neighbors( (0,0), only_positive=False, only_cardinal=False)) == [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
 assert sorted(neighbors( (0,0), only_positive=True, only_cardinal=False)) == [(0,1),(1,0),(1,1)]
+
+neighbors4 = neighbors
 
 def neighbors8(p, include_point=False):
   x,y = p
