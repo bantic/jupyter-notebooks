@@ -58,11 +58,11 @@ def submit_answer(dayNum, year, level, answer):
 # UTILS
 
 
-def get_input(dayNum, year=2020):
+def get_input(dayNum, year=2020, raw=False):
   data_file = _data_path(dayNum, year)
   if not data_file.exists():
       download_input(dayNum, year, data_file=data_file)
-  return [line.strip() for line in data_file.open().readlines()]
+  return [line.strip() if not raw else line for line in data_file.open().readlines()]
 
 
 def download_input(dayNum, year, data_file=None):
