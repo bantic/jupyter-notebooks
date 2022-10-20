@@ -7,12 +7,19 @@ from functools import reduce
 
 BASE_DATA_DIR = (pathlib.Path(__file__).parent.parent / "data").resolve()
 SESSION_COOKIE_PATH = BASE_DATA_DIR / "session_cookie.secret"
-SESSION_COOKIE = SESSION_COOKIE_PATH.open().readlines()[0].strip()
+try:
+  SESSION_COOKIE = SESSION_COOKIE_PATH.open().readlines()[0].strip()
+except FileNotFoundError:
+  print("===========================")
+  print("====",f"NO session cookie file found at {SESSION_COOKIE_PATH}")
+  print("===========================")
 
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 NUMERIC = "0123456789"
 
 DEBUG_ENABLED = True
+
+noop = lambda *a, **k: None
 
 
 def disable_debug():
