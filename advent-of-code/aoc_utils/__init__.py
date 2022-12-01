@@ -58,6 +58,7 @@ def submit_answer(dayNum, year, level, answer):
     # url = f"https://adventofcode.com/{year}/day/{dayNum}/answer"
     data = urlencode({"level": level, "answer": answer}).encode("utf-8")
     req = Request(url, data=data, headers={
+                  "user-agent": "https://github.com/bantic/jupyter-notebooks by cory.forsyth@gmail.com",
                   "cookie": f"session={SESSION_COOKIE}"})
     res = urlopen(req)
     for line in res.readlines():
@@ -83,7 +84,7 @@ def get_input(dayNum, year=2020, raw=False):
 def download_input(dayNum, year, data_file=None):
     import subprocess
     url = f"https://adventofcode.com/{year}/day/{dayNum}/input"
-    cmd = f"curl -H 'Cookie: session={SESSION_COOKIE}' {url} > {data_file}"
+    cmd = f"curl -H 'user-agent: https://github.com/bantic/jupyter-notebooks by cory.forsyth@gmail.com' -H 'Cookie: session={SESSION_COOKIE}' {url} > {data_file}"
     subprocess.run(cmd, capture_output=True, shell=True)
 
 
