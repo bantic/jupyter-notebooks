@@ -128,22 +128,31 @@ def sub3d(a, b):
 assert sub3d((5, 7, 9), (4, 5, 6)) == (1, 2, 3)
 assert sub3d((0, 2, 0), (-5, 0, 0)) == (5, 2, 0)
 
+CARDINAL_DELTAS = {
+    'U': (0, 1),
+    'D': (0, -1),
+    'R': (1, 0),
+    'L': (-1, 0)
+}
+
+DIAGONAL_DELTAS = {
+    'NE': (1, 1),
+    'NW': (-1, 1),
+    'SE': (1, -1),
+    'SW': (-1, -1),
+}
+
 
 def neighbors(point, only_positive=True, only_cardinal=True):
     x, y = point
-    possible = [
-        (x+1, y),
-        (x-1, y),
-        (x, y+1),
-        (x, y-1)
-    ]
+    possible = [(x+dx, y+dy) for (dx, dy) in CARDINAL_DELTAS.values()]
+    #     (x+1, y),
+    #     (x-1, y),
+    #     (x, y+1),
+    #     (x, y-1)
+    # ]
     if not only_cardinal:
-        possible += [
-            (x+1, y+1),
-            (x+1, y-1),
-            (x-1, y+1),
-            (x-1, y-1),
-        ]
+        possible += [(x+dx, y+dy) for (dx, dy) in DIAGONAL_DELTAS.values()]
     if only_positive:
         possible = filter(lambda c: c[0] >= 0 and c[1] >= 0, possible)
     return list(possible)
