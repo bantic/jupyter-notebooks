@@ -282,6 +282,7 @@ def mapints(s):
 
 
 getnums = mapints
+nums = mapints
 assert getnums("ab1sd3ghij-4") == [1, 3, -4]
 
 
