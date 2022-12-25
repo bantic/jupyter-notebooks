@@ -110,6 +110,11 @@ def dist3d(a, b):
     return math.sqrt((x2-x1)**2 + (y2-y1)**2 + (z2-z1)**2)
 
 
+def add2d(a, b):
+    assert len(a) == len(b) == 2
+    return (a[0] + b[0], a[1] + b[1])
+
+
 def add3d(a, b):
     x, y, z = a
     c, d, e = b
