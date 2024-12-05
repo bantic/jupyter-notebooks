@@ -18,12 +18,10 @@ let p1 = 0,
 for (let x = 0; x < data[0].length; x++) {
   for (let y = 0; y < data.length; y++) {
     p1 += dirs8.filter(dir => read([x,y],dir,4) === 'XMAS').length;
-    if (
+    p2 += (
       ["MAS", "SAM"].includes(read([x    , y], se, 3)) &&
       ["MAS", "SAM"].includes(read([x + 2, y], sw, 3))
-    ) {
-      p2 += 1;
-    }
+    );
   }
 }
-[p1, p2];
+console.log({p1, p2});
