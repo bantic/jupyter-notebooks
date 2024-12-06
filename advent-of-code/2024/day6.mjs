@@ -1,5 +1,5 @@
 import fs from "node:fs";
-let data = fs.readFileSync("day6.txt", { encoding: "utf8" }).trim();
+let data = fs.readFileSync("data/day6.txt", { encoding: "utf8" }).trim();
 let grid = data.split("\n").map((l) => l.split(""));
 let OUT = Symbol("out");
 let IS_LOOP = Symbol("loop");
@@ -66,9 +66,10 @@ let walls = new Set();
 for (let x = 0; x < grid[0].length; x++) {
   for (let y = 0; y < grid.length; y++) {
     let wall = [x, y];
-    if ([WALL, GUARD].includes(get(wall))) {
+    if (!uniquePositions.has([x, y].join(","))) {
       continue;
     }
+    if (get(wall) === GUARD) continue;
 
     let orig = grid[y][x];
     grid[y][x] = WALL;
