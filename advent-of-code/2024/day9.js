@@ -19,18 +19,20 @@ nums.forEach((count, idx) => {
     }
   }
 });
-findNextIndex = (arr, cb, from = 0) => from + arr.slice(from).findIndex(cb);
-findNextFree = (from = 0) => findNextIndex(disk, (v) => v === FREE, from);
+let freeIdxs = disk.reduce((acc, v, idx) => {
+  if (v === FREE) acc.push(idx);
+  return acc;
+}, []);
 for (
-  let j = disk.length - 1, freeIdx = findNextFree();
+  let j = disk.length - 1, freeIdx = freeIdxs.shift();
   freeIdx >= 0 && j >= freeIdx;
   j--
 ) {
   if (disk[j] !== FREE) {
     disk[freeIdx] = disk[j];
     disk[j] = FREE;
+    freeIdx = freeIdxs.shift() ?? -1;
   }
-  freeIdx = findNextFree(freeIdx);
 }
 checksum = (arr) =>
   arr.reduce((acc, v, idx) => (acc += v === FREE ? 0 : v * idx), 0);
