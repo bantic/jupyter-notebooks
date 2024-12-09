@@ -37,18 +37,17 @@ for (
 }
 checksum = (arr) =>
   arr.reduce((acc, v, idx) => (acc += v === FREE ? 0 : v * idx), 0);
+// 6386640365805
 console.log({ p1: checksum(disk) });
 
 {
   let diskIdx = 0;
   let blocks = nums.map((count, idx) => {
     let id = idx % 2 === 0 ? idx / 2 : FREE;
-    let start = diskIdx,
-      len = count;
+    let len = count;
     diskIdx += len;
     return {
       id,
-      start,
       len,
     };
   });
@@ -118,7 +117,6 @@ console.log({ p1: checksum(disk) });
   };
   for (let block of filterBlocks((b) => b.id !== FREE).toReversed()) {
     print(blocks);
-    console.log(block.id, block.len);
 
     let availBlock = findBlockBefore(
       block,
@@ -143,7 +141,6 @@ console.log({ p1: checksum(disk) });
     }
     return arr;
   }, []);
-  // 6596538422077 too high (?)
   // 6423258376982
   let p2 = checksum(decompressed);
   console.log({ p2 });
