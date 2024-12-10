@@ -20,9 +20,10 @@ get = ([x,y]) => grid[y]?.[x] ?? OUT;
 inGrid = ([x,y]) => get([x,y]) !== OUT;
 sum = arr => arr.reduce((acc,m) => acc+m,0);
 
-heads = grid.flatMap((row, y) => row.map((v,x) => {
-  return [v,x,y]
-}).filter(([v,x,y]) => v === 0).map(([v,x,y]) => [x,y]));
+heads = grid.flatMap((row, y) => row.reduce((acc,v,x) => {
+  if (v === 0) acc.push([x,y]);
+  return acc;
+},[]));
 
 follow = (pos,p1=false, seen=new Set()) => {
   let [x,y] = pos;
