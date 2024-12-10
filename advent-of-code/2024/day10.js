@@ -24,25 +24,19 @@ heads = grid.flatMap((row, y) => row.map((v,x) => {
   return [v,x,y]
 }).filter(([v,x,y]) => v === 0).map(([v,x,y]) => [x,y]));
 
-follow = (pos,seen=new Set()) => {
+follow = (pos,p1=false, seen=new Set()) => {
   let [x,y] = pos;
   let key = `${x},${y}`;
-  if (seen.has(key)) return 0;
-  seen.add(key);
+  if (p1) {
+    if (seen.has(key)) return 0;
+    seen.add(key);
+  }
   let v = get(pos);
   if (v === 9) return 1;
   let moves = dirs.map(d => move(pos,d)).filter(inGrid).filter(pos => get(pos) - 1 === v);
-  return sum(moves.map(m => follow(m,seen)));
+  return sum(moves.map(m => follow(m,p1,seen)));
 }
 
-console.log(heads);
-heads.forEach(h => {
-  if (get(h) === OUT) {
-    console.log(h);
-    throw new Error('bad h');
-  }
-})
-
-p1 = sum(heads.map(h => follow(h)));
-// 176 too low
-console.log({p1});
+p1 = sum(heads.map(h => follow(h,true)));
+p2 = sum(heads.map(h => follow(h,false)));
+console.log({p1, p2});
