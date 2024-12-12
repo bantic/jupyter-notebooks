@@ -86,25 +86,23 @@ getSides = (region) => {
   let lefts = [];
   let rights = [];
   let {up,down,left,right} = namedDirs;
-  getDir = (pos,dir) => get(move(pos,dir));
   for (let pos of region) {
     let v = get(pos);
-    if (getDir(pos,up) !== v) {
-      tops.push(move(pos,up));
-    }
-    if (getDir(pos,down) !== v) {
-      bottoms.push(move(pos,down));
-    }
-    if (getDir(pos,right) !== v) {
-      rights.push(move(pos,right));
-    }
-    if (getDir(pos,left) !== v) {
-      lefts.push(move(pos,left));
+    for (let [bucket,dir] of [
+      [tops,up],
+      [bottoms,down],
+      [lefts,left],
+      [rights,right],
+    ]) {
+      let next = move(pos,dir);
+      if (get(next) !== v) {
+        bucket.push(next);
+      }
     }
   }
-  return sum([tops,bottoms,lefts,rights].map(pos_s => countUniqueRegions(pos_s)));
+  return sum([tops,bottoms,lefts,rights].map(pos_s => countNonAdjoining(pos_s)));
 };
-countUniqueRegions = (pos_s) => {
+countNonAdjoining = (pos_s) => {
   let seen = [];
   let stack = sortXYAsc(pos_s);
   let count = 0;
@@ -119,17 +117,10 @@ countUniqueRegions = (pos_s) => {
   }
   return count;
 }
-
-let regions = segment(grid, dirs);
 getArea = region => region.length;
 
-let p1 = sum(
-  regions.map((r) => {
-    return getArea(r) * getPerimeter(r);
-  })
-);
-console.log({ p1 });
-let p2 = sum(regions.map(r => {
-  return getArea(r) * getSides(r)
-}));
-console.log({p2})
+let regions = segment(grid, dirs);
+
+let p1 = sum(regions.map((r) => getArea(r) * getPerimeter(r)));
+let p2 = sum(regions.map((r) => getArea(r) * getSides(r)));
+console.log({ p1, p2 });
