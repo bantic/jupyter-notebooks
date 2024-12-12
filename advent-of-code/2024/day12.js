@@ -2,21 +2,6 @@ fs = require("node:fs");
 assert = require("node:assert");
 data = fs.readFileSync("./data/day12-test.txt", "utf8").trim();
 data = fs.readFileSync("./data/day12.txt", "utf8").trim();
-// data = `AAAA
-// BBCD
-// BBCC
-// EEEC`.trim();
-// data = `EEEEE
-// EXXXX
-// EEEEE
-// EXXXX
-// EEEEE`.trim();
-// data = `AAAAAA
-// AAABBA
-// AAABBA
-// ABBAAA
-// ABBAAA
-// AAAAAA`.trim();
 grid = data.split("\n").map((l) => l.split(""));
 OUT = Symbol("out");
 get = ([x, y]) => grid[y]?.[x] ?? OUT;
@@ -26,8 +11,6 @@ namedDirs = {
   left: [-1, 0],
   right: [1, 0],
 };
-ydirs = [namedDirs.up, namedDirs.down];
-xdirs = [namedDirs.left, namedDirs.right];
 dirs = Object.values(namedDirs);
 move = ([x, y], [dx, dy]) => [x + dx, y + dy];
 toKey = (pos) => pos.join(",");
@@ -78,7 +61,7 @@ fill = (pos, dirs) => {
   }
   return region;
 };
-perimeter = (region, dirs) => {
+getPerimeter = (region) => {
   let perim = 0;
   for (let pos of region) {
     let v = get(pos);
@@ -92,12 +75,12 @@ adjoins = ([x1, y1], [x2, y2]) => {
   let dy = Math.abs(y2-y1);
   return (dx+dy) === 1;
 };
-sortLtoR = (region) => {
+sortXYAsc = (region) => {
   return region.toSorted(([x1, y1], [x2, y2]) => {
     return x2 > x1 ? -1 : x2 < x1 ? 1 : y2 > y1 ? -1 : y2 < y1 ? 1 : 0;
   });
 };
-countSides = (region) => {
+getSides = (region) => {
   let tops = [];
   let bottoms = [];
   let lefts = [];
@@ -123,10 +106,12 @@ countSides = (region) => {
 };
 countUniqueRegions = (pos_s) => {
   let seen = [];
-  let stack = sortLtoR(pos_s);
+  let stack = sortXYAsc(pos_s);
   let count = 0;
   while (stack.length) {
     let pos = stack.shift();
+    // this check assumes they are sorted, otherwise we could see
+    // opposite corners of the same side and count it 2x
     if (!seen.some(p => adjoins(p,pos))) {
       count += 1;
     }
@@ -136,22 +121,15 @@ countUniqueRegions = (pos_s) => {
 }
 
 let regions = segment(grid, dirs);
+getArea = region => region.length;
 
 let p1 = sum(
   regions.map((r) => {
-    let area = r.length;
-    let perim = perimeter(r, dirs);
-    return area * perim;
+    return getArea(r) * getPerimeter(r);
   })
 );
-// 203874566 too high
 console.log({ p1 });
 let p2 = sum(regions.map(r => {
-  // console.log(get(r[0]));
-  let area = r.length;
-  let s = countSides(r);
-  // console.log(get(r[0]),area,s);
-  return area * s;
+  return getArea(r) * getSides(r)
 }));
-// // // 4251040 too high
 console.log({p2})
