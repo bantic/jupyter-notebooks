@@ -1,17 +1,11 @@
 fs = require("node:fs");
 assert = require("node:assert");
-data = fs.readFileSync("./data/day12-test.txt", "utf8").trim();
+// data = fs.readFileSync("./data/day12-test.txt", "utf8").trim();
 data = fs.readFileSync("./data/day12.txt", "utf8").trim();
 grid = data.split("\n").map((l) => l.split(""));
 OUT = Symbol("out");
 get = ([x, y]) => grid[y]?.[x] ?? OUT;
-namedDirs = {
-  up: [0, -1],
-  down: [0, 1],
-  left: [-1, 0],
-  right: [1, 0],
-};
-dirs = Object.values(namedDirs);
+dirs = [[0,-1],[0,1],[-1,0],[1,0]];
 move = ([x, y], [dx, dy]) => [x + dx, y + dy];
 toKey = (pos) => pos.join(",");
 sum = (arr) => arr.reduce((acc, m) => acc + m, 0);
@@ -81,26 +75,18 @@ sortXYAsc = (region) => {
   });
 };
 getSides = (region) => {
-  let tops = [];
-  let bottoms = [];
-  let lefts = [];
-  let rights = [];
-  let {up,down,left,right} = namedDirs;
+  let groups = dirs.map(dir => [[],dir]);
   for (let pos of region) {
     let v = get(pos);
-    for (let [bucket,dir] of [
-      [tops,up],
-      [bottoms,down],
-      [lefts,left],
-      [rights,right],
-    ]) {
+    for (let [bucket,dir] of groups) {
       let next = move(pos,dir);
       if (get(next) !== v) {
         bucket.push(next);
       }
     }
   }
-  return sum([tops,bottoms,lefts,rights].map(pos_s => countNonAdjoining(pos_s)));
+  let buckets = groups.map(([bucket,]) => bucket);
+  return sum(buckets.map(pos_s => countNonAdjoining(pos_s)));
 };
 countNonAdjoining = (pos_s) => {
   let seen = [];
@@ -120,7 +106,6 @@ countNonAdjoining = (pos_s) => {
 getArea = region => region.length;
 
 let regions = segment(grid, dirs);
-
 let p1 = sum(regions.map((r) => getArea(r) * getPerimeter(r)));
 let p2 = sum(regions.map((r) => getArea(r) * getSides(r)));
 console.log({ p1, p2 });
