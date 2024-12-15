@@ -25,6 +25,8 @@ WALL = '#'
 BOX = 'O'
 SPACE = '.'
 BOT = '@'
+BOXL = '[';
+BOXR = ']';
 
 
 parse = data => {
@@ -46,6 +48,7 @@ parse = data => {
 }
 
 print = grid => {
+  return;
   console.log(grid.map(l => l.join('')).join('\n'));
 }
 
@@ -125,19 +128,16 @@ let score = grid => {
   return sum;
 }
 
-// let state = parse(data);
-// print(state[0]);
-// let i = 0;
-// while (state[1].length) {
-//   i++;
-//   console.log(i);
-//   state = next(state);
-// }
-// print(state[0]);
-// console.log(score(state[0]));
+{
+  let state = parse(data);
+  // print(state[0]);
+  while (state[1].length) {
+    state = next(state);
+  }
+  // print(state[0]);
+  console.log({p1: score(state[0])});
+}
 
-BOXL = '[';
-BOXR = ']';
 p2charmap = {
   [BOX]: [BOXL,BOXR],
   [WALL]: [WALL,WALL],
@@ -275,7 +275,7 @@ next2 = state => {
   let [grid,moves,pos] = state;
   assert(get(grid,pos) === BOT);
   let move = moves.shift();
-  console.log(`Move: ${move}`);
+  // console.log(`Move: ${move}`);
   let [canMove, toMovePos_s] = checkMove(grid,move,pos);
   if (!canMove) { return [grid,moves,pos]; }
 
@@ -285,9 +285,9 @@ next2 = state => {
 
 let state = parse2(data);
 print(state[0]);
-console.log(state[1].length,state[2]);
+// console.log(state[1].length,state[2]);
 while (state[1].length) {
   state = next2(state);
-  print(state[0]);
+  // print(state[0]);
 }
-console.log(score(state[0]))
+console.log({p2: score(state[0])})
