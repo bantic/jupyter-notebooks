@@ -88,30 +88,31 @@ nearby = (grid,state) => {
   ].filter(([pos,_heading,_cost]) => get(grid,pos) !== WALL);
 }
 
+hash = JSON.stringify;
 search = (grid,startPos,startHeading,targetPos) => {
   let seenStates = new Map();
   let posCost = new Map();
-  let hash = JSON.stringify;
 
   let startState = [startPos,startHeading,0];
   let stack = [ startState ];
   while (stack.length) {
     let state = stack.shift();
     let [pos,heading,cost] = state;
-    let key = hash([pos,heading]);
-    if (seenStates.has(key)) {
-      let prevCost = seenStates.get(key);
+    let stateKey = hash([pos,heading]);
+    if (seenStates.has(stateKey)) {
+      let prevCost = seenStates.get(stateKey);
       if (cost >= prevCost) {
         continue;
       }
     }
-    seenStates.set(key, cost);
+    seenStates.set(stateKey, cost);
 
-    let prevPosCost = posCost.get(hash(pos)) ?? Infinity;
+    let posKey = hash(pos);
+    let prevPosCost = posCost.get(posKey) ?? Infinity;
     if (prevPosCost < cost) {
       continue;
     }
-    posCost.set(hash(pos), Math.min(prevPosCost, cost));
+    posCost.set(posKey, Math.min(prevPosCost, cost));
     if (eqArr(pos,targetPos)) {
       continue;
     }
@@ -121,8 +122,9 @@ search = (grid,startPos,startHeading,targetPos) => {
     stack = [...next, ...stack];
   }
 
-  return posCost.get(hash(targetPos));
+  return posCost;
 }
 
-let p1 = search(grid, findPos(grid,'S'), E, findPos(grid,'E'));
-console.log(p1);
+let startPos = findPos(grid,'S'), targetPos = findPos(grid,'E');
+let p1 = search(grid, startPos, E, targetPos).get(hash(targetPos));
+console.log({p1});
