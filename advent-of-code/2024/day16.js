@@ -37,6 +37,8 @@ testdata2 = `#################
 #S#.............#
 #################`.trim();
 
+// data = testdata;
+
 WALL='#'
 SPACE='.'
 parse = data => data.split('\n').map(l => l.split(''));
@@ -126,5 +128,56 @@ search = (grid,startPos,startHeading,targetPos) => {
 }
 
 let startPos = findPos(grid,'S'), targetPos = findPos(grid,'E');
-let p1 = search(grid, startPos, E, targetPos).get(hash(targetPos));
+let posCosts = search(grid, startPos, E, targetPos);
+let p1 = posCosts.get(hash(targetPos));
 console.log({p1});
+
+search2 = (grid,startPos,startHeading,targetPos,targetCost) => {
+  let seenStates = new Map();
+  let posCost = new Map();
+  let bestPaths = [];
+  let uniqBestPos = new Set();
+
+  let startState = [startPos,startHeading,0,[startPos]];
+  let stack = [ startState ];
+  while (stack.length) {
+    let state = stack.shift();
+    let [pos,heading,cost,path] = state;
+    if (cost > targetCost) continue;
+    let stateKey = hash([pos,heading]);
+    if (seenStates.has(stateKey)) {
+      let prevCost = seenStates.get(stateKey);
+      if (cost > prevCost) {
+        continue;
+      }
+    }
+    seenStates.set(stateKey, cost);
+
+    // let posKey = hash(pos);
+    // let prevPosCost = posCost.get(posKey) ?? Infinity;
+    // if (prevPosCost < cost) {
+    //   continue;
+    // }
+    // posCost.set(posKey, Math.min(prevPosCost, cost));
+    if (eqArr(pos,targetPos)) {
+      assert(cost >= targetCost);
+      if (cost === targetCost) {
+        path.forEach(p => uniqBestPos.add(hash(p)));
+        // bestPaths.push(path);
+      }
+      continue;
+    }
+    let next = nearby(grid,state).map(([nextPos,nextHeading,nextCost]) => {
+      return [nextPos,nextHeading,cost+nextCost, path.concat([nextPos])];
+    });
+    stack = [...next, ...stack];
+  }
+
+  // let uniqBestPos = new Set();
+  // bestPaths.forEach(path => path.forEach(p => uniqBestPos.add(hash(p))));
+  return uniqBestPos;
+}
+
+let bestPos = search2(grid,startPos,E,targetPos,p1);
+let p2 = bestPos.size;
+console.log({p2});
