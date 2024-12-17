@@ -1,6 +1,16 @@
 fs = require("node:fs");
 assert = require('node:assert');
 data = fs.readFileSync("./data/day17.txt", "utf8").trim();
+
+testdata = `
+Register A: 2024
+Register B: 0
+Register C: 0
+
+Program: 0,3,5,4,3,0`.trim();
+
+// data = testdata;
+
 toInt = v => parseInt(v);
 toInts = str => Array.from(str.matchAll(/\d+/g)).map(toInt);
 parse = data => {
@@ -105,11 +115,109 @@ runOne = state => {
   return op(state,operand);
 }
 
-testData = `Register A: 729
-Register B: 0
-Register C: 0
-
-Program: 0,1,5,4,3,0`.trim();
-
 let p1 = runAll(parse(data)).out.join(',');
 console.log({p1})
+
+
+isEq = (arr1,arr2) => {
+  return arr1.length === arr2.length && isPrefixEq(arr1,arr2);
+}
+isPrefixEq = (arr1,arr2) => {
+  for (let i = 0; i < arr1.length; i++) {
+    if (arr1[i] !== arr2[i]) return false;
+  }
+  return true;
+}
+assert(isEq([1,2,3],[1,2,3]));
+assert(isEq([],[]));
+assert(isPrefixEq([],[]));
+assert(isPrefixEq([],[1,2,3]));
+assert(isPrefixEq([1],[1,2,3]));
+
+let state = parse(data);
+let p2 = 105734774294938;
+state.A = p2;
+let end = runAll(state);
+console.log(end);
+assert(isEq(end.out,state.prog));
+console.log({p2});
+
+// This attempt did not go anywhere:
+solvep2 = (initState,targetOut) => {
+  let MAX_ITERS = 50;
+
+  let {B,C,prog} = initState;
+  makeState = guess => {
+    return {
+      A: guess,
+      B,
+      C,
+      prog,
+      out: [],
+      ip: 0
+    };
+  }
+
+  let guess = -1;
+  // let guess = 20443186 - 1;
+  // let guess = 142246040 - 1;
+  // let guess = 638000000 - 1;
+  // guess = 1821000000 - 1;
+  // guess = 2388743321 - 1;
+  // guess = 2647743320 - 1;
+  // guess = 2783614233 - 1;
+  // guess = 1021136002000000-1;
+  // guess = 62217;
+  guess = 37259674 - 1;
+  let bestLen = 0;
+  let bestLenIncorrect = 0;
+  let seenmod8 = {};
+  let idx = 0;
+  while (true) {
+    guess++;
+    idx++;
+    // if (![0,1,2,3,6].includes(guess % 8)) continue;
+    // if (![1,2].includes(guess % 8)) continue;
+    if (idx % 1_000_000 === 0) console.log(`Guess: ${guess}`);
+    let state = makeState(guess);
+    while (isPrefixEq(state.out, targetOut) && !isEq(state.out,targetOut)) {
+      let iters = 0;
+      let flag = false;
+      let len = state.out.length;
+      while (iters < MAX_ITERS && len === state.out.length) {
+        iters++;
+        try {
+          state = runOne(state);
+        } catch {
+          flag = true;
+          break;
+        }
+      }
+      if (iters === MAX_ITERS) {
+        console.log('max iters');
+        break;
+      }
+      if (flag) break;
+      for (let i = 0; i < state.out.length; i++) {
+        if (state.out[i] === state.prog[i]) {
+          seenmod8[i] ??= new Set();
+          let had = seenmod8[i].has(guess % 8);
+          seenmod8[i].add(guess % 8);
+          if (!had) {
+            console.log('seenmod8',seenmod8);
+          }
+        }
+      }
+      if (isPrefixEq(state.out,prog) && state.out.length > bestLen) {
+        bestLen = state.out.length;
+        console.log(`Guess ${guess}: ${state.out.join(',')}`);
+      }
+    }
+    if (isEq(state.out,targetOut)) {
+      return guess;
+    }
+  }
+}
+
+// let p2 = solvep2(parse(data),parse(data).prog);
+// console.log({p2});
