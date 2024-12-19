@@ -34,3 +34,18 @@ let solve = data => {
 }
 
 console.log({p1: solve(data)});
+
+let sum = arr => arr.reduce((acc,m) => acc+m, 0);
+let solve2 = data => {
+  let {pats,rugs} = parse(data);
+  let count = (rug) => {
+    if (rug.length === 0) return 1;
+    let _pats = pats.filter(p => rug.startsWith(p));
+    if (_pats.length === 0) return 0;
+    return sum(_pats.map(p => count(rug.slice(p.length))));
+  };
+  count = memoize(count);
+  return sum(rugs.map(count));
+}
+
+console.log({p2: solve2(data)});
