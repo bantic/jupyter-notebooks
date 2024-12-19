@@ -9,8 +9,6 @@ let parse = data => {
   return {pats,rugs};
 }
 
-console.log(parse(data));
-
 let memoize = (fn) => {
   let hash = (...args) => {
     return JSON.stringify(args);
@@ -32,14 +30,7 @@ let solve = data => {
     return pats.filter(p => rug.startsWith(p)).some(p => isMatch(rug.slice(p.length)));
   };
   isMatch = memoize(isMatch);
-
-  let p1 = 0;
-  for (let rug of rugs) {
-    let matches = isMatch(rug);
-    console.log(matches,rug);
-    if (matches) { p1 += 1; }
-  }
-  return p1;
+  return rugs.filter(isMatch).length;
 }
 
 console.log({p1: solve(data)});
