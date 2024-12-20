@@ -36,6 +36,7 @@ let veceq = (v1,v2) => v1.length === v2.length && v1.every((v,idx) => v === v2[i
 let vecmul = (v1,mul) => v1.map(v => v*mul);
 let sum = arr => arr.reduce((acc,m) => acc+m,0);
 let manhattanDistance = (v1,v2) => {
+  if (v1.length !== v2.length) debugger;
   assert(v1.length === v2.length);
   return sum(vecadd(vecmul(v1,-1),v2).map(Math.abs));
 }
@@ -107,6 +108,39 @@ let solve = data => {
   return Array.from(cheatCosts.entries()).filter(([cheat,savings]) => savings >= 100).length;
 }
 
-// 2002 too high
-let p1 = solve(data);
-console.log({p1});
+// let p1 = solve(data);
+// console.log({p1});
+
+let solve2 = data => {
+  let {grid,start,end} = parse(data);
+  let [path,costs] = traverse(grid,start,end);
+  let maxlen = 20;
+
+  let cheatCosts = new Map();
+
+  let _idx = 0;
+  for (let i = 0; i < path.length; i++) {
+    _idx++;
+    if (_idx % 100 === 0) { console.log(_idx,path.length); }
+
+    let p = path[i];
+    let pCost = costs.get(hash(p));
+    for (let j = i+1; j < path.length; j++) {
+      let cend = path[j];
+      if ((md(p,cend)) > maxlen) continue;
+      let cheat = [p, cend];
+      let oldCost = costs.get(hash(cend));
+      let newCost = pCost + md(cheat[0], cheat[1]);
+      let save = oldCost - newCost;
+      cheatCosts.set(hash(cheat), save);
+    }
+  }
+
+  debugger;
+  let p2 = Array.from(cheatCosts.entries()).filter(([cheat,savings]) => savings >= 100).length;
+  return p2;
+}
+
+
+let p2 = solve2(data);
+console.log({p2});
