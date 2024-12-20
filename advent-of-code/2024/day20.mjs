@@ -104,15 +104,7 @@ let solve = data => {
     }
   }
 
-  let p1 = 0;
-  let posCheats = Array.from(cheatCosts.entries()).filter(([cheat,savings]) => savings > 0);
-  debugger;
-  for (let [cheat,savings] of cheatCosts) {
-    if (savings >= 100) {
-      p1 += 1;
-    }
-  }
-  return p1;
+  return Array.from(cheatCosts.entries()).filter(([cheat,savings]) => savings >= 100).length;
 }
 
 // 2002 too high
