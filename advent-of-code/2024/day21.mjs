@@ -16,6 +16,18 @@ let manhattanDistance = (v1,v2) => {
   return sum(vecadd(vecmul(v1,-1),v2).map(Math.abs));
 }
 let md = manhattanDistance;
+let memoize = (fn) => {
+  let hash = JSON.stringify;
+  let cache = new Map();
+  return (...args) => {
+    let key = hash(args);
+    if (!cache.has(key)) {
+      cache.set(key, fn(...args));
+    }
+    return cache.get(key);
+  };
+};
+
 let MOVES = {
   '>': [1,0],
   '<': [-1,0],
@@ -124,6 +136,7 @@ let getPaths = (startPos,endPos, grid) => {
 }
 let npaths = (startBtn,endBtn) => getPaths(npadBtn2Pos[startBtn],npadBtn2Pos[endBtn],npadGrid);
 let dpaths = (startBtn,endBtn) => getPaths(dpadBtn2Pos[startBtn],dpadBtn2Pos[endBtn],dpadGrid);
+dpaths = memoize(dpaths);
 
 let getSeqPaths = (seq, prev='A', paths=[[]]) => {
   if (seq.length === 0) return paths;
@@ -138,10 +151,8 @@ let getSeqPaths = (seq, prev='A', paths=[[]]) => {
   }
   return getSeqPaths(seq.slice(1), next, newPaths);
 }
+getSeqPaths = memoize(getSeqPaths);
 
-console.log(getSeqPaths('<A'.split('')));
-console.log(getSeqPaths('v<<A>>^A'.split('')).map(s => s.join('')));
-console.log('<vA<AA>>^AvAA<^A>A<');
 let bestDseqLen = (seq, depth=0) => {
   let seqs = getSeqPaths(seq);
   let l = seqs[0].length;
@@ -153,6 +164,7 @@ let bestDseqLen = (seq, depth=0) => {
     ...seqs.map(seq => bestDseqLen(seq,depth-1))
   );
 };
+bestDseqLen = memoize(bestDseqLen);
 
 let solve = (code, depth=1) => {
   let curBtn = 'A';
@@ -160,8 +172,8 @@ let solve = (code, depth=1) => {
   for (let btn of code.split('')) {
     let seqs = npaths(curBtn,btn).map(path => [...path,'A']);
     bestLen += Math.min(
-      ...seqs.map(s => bestDseqLen(s,1)
-    ));
+      ...seqs.map(s => bestDseqLen(s,depth))
+    );
     curBtn = btn;
   }
   return bestLen;
@@ -175,35 +187,29 @@ let sols = `
 379A: <v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
 `.trim();
 
-let complexity = code => {
-  let len = solve(code);
+let complexity = (code,depth=1) => {
+  let len = solve(code,depth);
   let num = parseInt(code.match(/\d+/)[0], 10);
   return num * len;
-}
-
-let comp = 0;
-for (let s of sols.split('\n')) {
-  let [code,seq] = s.split(': ');
-  console.log(`${code}: (${seq.length}): ${seq}`);
-
-  console.log(solve(code), complexity(code));
-  comp += complexity(code);
-}
-console.log('total comp:',comp);
-
-comp = 0;
-for (let code of data.split('\n')) {
-  console.log(`${code}: ${solve(code)}`);
-  comp += complexity(code);
 }
 
 let solvep1 = data => {
   let comp = 0;
   for (let code of data.split('\n')) {
-    console.log(`${code}: ${solve(code, 1)}`);
-    comp += complexity(code);
+    comp += complexity(code, 1);
+  }
+  return comp;
+}
+
+let solvep2 = data => {
+  debugger;
+  let comp = 0;
+  for (let code of data.split('\n')) {
+    console.log('p2',code);
+    comp += complexity(code, 24);
   }
   return comp;
 }
 
 console.log({p1: solvep1(data)});
+console.log({p2: solvep2(data)});
