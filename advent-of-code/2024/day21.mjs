@@ -2,6 +2,12 @@ import fs from 'node:fs';
 import assert from 'node:assert';
 let data = fs.readFileSync("./data/day21.txt", "utf8").trim();
 
+let testdata = `029A
+980A
+179A
+456A
+379A`.trim();
+
 let OUT = Symbol();
 let codes = data.split('\n');
 let vecadd = (v1,v2) => {
@@ -122,9 +128,9 @@ let getPaths = (startPos,endPos, grid) => {
   let dx = endPos[0] - startPos[0];
   let dy = endPos[1] - startPos[1];
   let moves = [];
-  if (dy < 0) moves.push('^');
-  if (dx > 0) moves.push('>');
   if (dy > 0) moves.push('v');
+  if (dx > 0) moves.push('>');
+  if (dy < 0) moves.push('^');
   if (dx < 0) moves.push('<');
   let movesWithPos = moves.map(move => {
     return [move, vecadd(startPos, MOVES[move])];
@@ -139,6 +145,97 @@ let npaths = (startBtn,endBtn) => getPaths(npadBtn2Pos[startBtn],npadBtn2Pos[end
 npaths = memoize(npaths);
 let dpaths = (startBtn,endBtn) => getPaths(dpadBtn2Pos[startBtn],dpadBtn2Pos[endBtn],dpadGrid);
 dpaths = memoize(dpaths);
+
+let getBestNPath = (startBtn,endBtn) => npaths(startBtn,endBtn)[0];
+
+/*
+
+    +---+---+
+    | ^ | A |
++---+---+---+
+| < | v | > |
++---+---+---+
+
+*/
+
+let getBestDPath = (startBtn,endBtn) => {
+  if (startBtn === endBtn) { return []; }
+  switch (`${startBtn}${endBtn}`) {
+    case 'A<': return ['v','<','<'];
+    case 'A^': return ['<'];
+    case 'Av': return ['v','<'];
+    case 'A>': return ['v'];
+    case '^A': return ['>'];
+    case '^v': return ['v'];
+    case '^<': return ['v','<'];
+    case '^>': return ['>','v']; // probably best, since > is better than v
+    case '<^': return ['>','^'];
+    case '<A': return ['>','>','^']; // could exchange last 2?
+    case '<v': return ['>'];
+    case '<>': return ['>','>'];
+    case 'v^': return ['^'];
+    case 'vA': return ['>','^']; // could exchange
+    case 'v<': return ['<'];
+    case 'v>': return ['>'];
+    case '>^': return ['^','<'];
+    case '>A': return ['^'];
+    case '><': return ['<','<'];
+    case '>v': return ['<'];
+  }
+  assert(false);
+}
+
+let getBestDPaths = (startBtn,endBtn) => {
+  if (startBtn === endBtn) { return []; }
+  switch (`${startBtn}${endBtn}`) {
+    case 'A<': return [['v','<','<']];
+    case 'A^': return [['<']];
+    case 'Av': return [['v','<']];
+    case 'A>': return [['v']];
+    case '^A': return [['>']];
+    case '^v': return [['v']];
+    case '^<': return [['v','<']];
+    case '^>': return [['>','v'],['v','>']]; // probably best, since > is better than v
+    case '<^': return [['>','^']];
+    case '<A': return [['>','>','^'],['>','^','>']]; // could exchange last 2?
+    case '<v': return [['>']];
+    case '<>': return [['>','>']];
+    case 'v^': return [['^']];
+    case 'vA': return [['>','^'],['^','>']]; // could exchange
+    case 'v<': return [['<']];
+    case 'v>': return [['>']];
+    case '>^': return [['^','<']];
+    case '>A': return [['^']];
+    case '><': return [['<','<']];
+    case '>v': return [['<']];
+  }
+  assert(false);
+}
+
+
+let expand = (dseq,prev='A') => {
+  let path = [];
+  for (let btn of dseq) {
+    path.push(...getBestDPath(prev,btn));
+    path.push('A');
+    prev = btn;
+  }
+  return path;
+}
+
+let expandMultiple = (dseq,prev='A',paths=[[]]) => {
+  if (dseq.length === 0) return paths;
+  let next = dseq[0];
+  let nextPaths = getBestDPaths(prev,next);
+  let newPaths = [];
+  for (let path of paths) {
+    for (let nextPath of nextPaths) {
+      let newPath = [...path,...nextPath, 'A'];
+      newPaths.push(newPath);
+    }
+  }
+  return expandMultiple(dseq.slice(1),next,newPaths);
+}
 
 function getSeqPaths(seq, prev='A', paths=[[]]) {
   if (seq.length === 0) return paths;
@@ -155,15 +252,14 @@ function getSeqPaths(seq, prev='A', paths=[[]]) {
 }
 // getSeqPaths = memoize(getSeqPaths);
 
-let SEEN_DEPTHS = new Set();
+// let SEEN_DEPTHS = new Set();
 let bestDseqLen = (seq, depth=0) => {
-  if (!SEEN_DEPTHS.has(depth)) {
-    console.log(`seen depth: ${depth}`)
-  }
-  SEEN_DEPTHS.add(depth);
+  // if (!SEEN_DEPTHS.has(depth)) {
+  //   console.log(`seen depth: ${depth}`)
+  // }
+  // SEEN_DEPTHS.add(depth);
   let seqs = getSeqPaths(seq);
   let l = seqs[0].length;
-  console.log('depth',depth,'l:',l);
   assert(seqs.every(s => s.length === l));
   if (depth === 0) { return seqs[0].length; }
   let bestLen = Infinity;
@@ -214,15 +310,46 @@ let solvep1 = data => {
   return comp;
 }
 
-let solvep2 = data => {
+// let solvep2 = data => {
+//   debugger;
+//   let comp = 0;
+//   for (let code of data.split('\n')) {
+//     console.log('p2',code);
+//     comp += complexity(code, 24);
+//   }
+//   return comp;
+// }
+
+
+console.log({p1: solvep1(data)});
+
+let solveCode_a = (code,depth) => {
   debugger;
+
+  let path = [];
+  let prev = 'A';
+
+  for (let btn of code) {
+    let segment = [...getBestNPath(prev,btn), 'A'];
+    for (let i = 0; i < depth; i++) {
+      segment = expand(segment);
+    }
+    path.push(...segment);
+    prev = btn;
+  }
+  return path;
+}
+
+let solvep1_a = data => {
   let comp = 0;
   for (let code of data.split('\n')) {
-    console.log('p2',code);
-    comp += complexity(code, 24);
+    let path = solveCode_a(code.split(''), 2);
+    let num = parseInt(code.match(/\d+/)[0], 10);
+    console.log(code, path.length);
+    comp += path.length * num;
   }
   return comp;
 }
 
-console.log({p1: solvep1(data)});
-console.log({p2: solvep2(data)});
+let p1a = solvep1_a(data);
+console.log({p1a});
