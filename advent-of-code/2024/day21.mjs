@@ -121,10 +121,11 @@ let getPaths = (startPos,endPos, grid) => {
   if (veceq(startPos,endPos)) { return [[]]; }
   let dx = endPos[0] - startPos[0];
   let dy = endPos[1] - startPos[1];
-  let moves = [
-    ...[ dx > 0 ? '>' : dx === 0 ? null : '<' ].filter(Boolean),
-    ...[ dy > 0 ? 'v' : dy === 0 ? null : '^' ].filter(Boolean),
-  ];
+  let moves = [];
+  if (dy < 0) moves.push('^');
+  if (dx > 0) moves.push('>');
+  if (dy > 0) moves.push('v');
+  if (dx < 0) moves.push('<');
   let movesWithPos = moves.map(move => {
     return [move, vecadd(startPos, MOVES[move])];
   });
@@ -135,10 +136,11 @@ let getPaths = (startPos,endPos, grid) => {
   return retval;
 }
 let npaths = (startBtn,endBtn) => getPaths(npadBtn2Pos[startBtn],npadBtn2Pos[endBtn],npadGrid);
+npaths = memoize(npaths);
 let dpaths = (startBtn,endBtn) => getPaths(dpadBtn2Pos[startBtn],dpadBtn2Pos[endBtn],dpadGrid);
 dpaths = memoize(dpaths);
 
-let getSeqPaths = (seq, prev='A', paths=[[]]) => {
+function getSeqPaths(seq, prev='A', paths=[[]]) {
   if (seq.length === 0) return paths;
   let next = seq[0];
   let nextPaths = dpaths(prev,next);
@@ -151,20 +153,31 @@ let getSeqPaths = (seq, prev='A', paths=[[]]) => {
   }
   return getSeqPaths(seq.slice(1), next, newPaths);
 }
-getSeqPaths = memoize(getSeqPaths);
+// getSeqPaths = memoize(getSeqPaths);
 
+let SEEN_DEPTHS = new Set();
 let bestDseqLen = (seq, depth=0) => {
+  if (!SEEN_DEPTHS.has(depth)) {
+    console.log(`seen depth: ${depth}`)
+  }
+  SEEN_DEPTHS.add(depth);
   let seqs = getSeqPaths(seq);
   let l = seqs[0].length;
+  console.log('depth',depth,'l:',l);
   assert(seqs.every(s => s.length === l));
-  if (depth === 0) {
-    return seqs[0].length;
+  if (depth === 0) { return seqs[0].length; }
+  let bestLen = Infinity;
+  for (let seq of seqs) {
+    let len = bestDseqLen(seq, depth-1);
+    if (len < bestLen) {
+      bestLen = len;
+    } else {
+      break;
+    }
   }
-  return Math.min(
-    ...seqs.map(seq => bestDseqLen(seq,depth-1))
-  );
+  return bestLen;
 };
-bestDseqLen = memoize(bestDseqLen);
+// bestDseqLen = memoize(bestDseqLen);
 
 let solve = (code, depth=1) => {
   let curBtn = 'A';
