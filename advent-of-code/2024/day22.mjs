@@ -2,6 +2,11 @@ import fs from 'node:fs';
 import assert from 'node:assert';
 let data = fs.readFileSync("./data/day22.txt", "utf8").trim();
 
+let testdata = `1
+2
+3
+2024`.trim();
+
 let toInt = v => parseInt(v);
 // let toBigInt = v => BigInt(parseInt(v));
 let parse = data => data.split('\n').map(toInt);
@@ -66,25 +71,54 @@ let getPriceSeq = (v,len) => {
 }
 
 let solve2 = data => {
-  let uniqPriceSeqs = new Set();
   let seqs = parse(data).reduce((acc,v) => {
     let seq   = getPriceSeq(v,2000);
-    let bestPriceSequencesByPrice = new Map();
+    let diffSeqsByDiff = new Map();
     for (let i = 4; i < seq.length; i++) {
       let price = seq[i];
-      if (bestPriceSequencesByPrice.has(price)) continue;
       let [p1,p2,p3,p4,p5] = seq.slice(i-4,i+1);
       assert(p5 === price);
       let diffs = [p2-p1,p3-p2,p4-p3,p5-p4];
-      bestPriceSequencesByPrice.set(price, JSON.stringify(diffs));
-      uniqPriceSeqs.add(JSON.stringify(diffs));
+      diffs = JSON.stringify(diffs);
+      if (diffSeqsByDiff.has(diffs)) {
+        continue;
+      }
+      diffSeqsByDiff.set(diffs, price);
     }
-    acc.set(v,{prices: seq, bestPriceSequencesByPrice});
+    // let diffSeqsByDiff = new Map();
+    // diffSeqsByPrice.forEach((diff,price) => {
+    //   diffSeqsByDiff.set(diff,price);
+    // });
+    acc.set(v,{prices: seq, diffSeqsByDiff});
     return acc;
   }, new Map());
 
+  let uniqDiffSeqs = new Set();
+  for (let [number,details] of seqs) {
+    for (let [diff,price] of details.diffSeqsByDiff) {
+      uniqDiffSeqs.add(diff);
+    }
+  }
+
+  let getTotalPriceForDiff = diff => {
+    let total = 0;
+    for (let [number,details] of seqs) {
+      if (details.diffSeqsByDiff.has(diff)) {
+        total += details.diffSeqsByDiff.get(diff);
+      }
+    }
+    return total;
+  }
+
+  let best = -Infinity;
+  for (let diff of uniqDiffSeqs) {
+    best = Math.max(best, getTotalPriceForDiff(diff));
+  }
   debugger;
+  return best;
 }
 
 console.log({p1: solve(data)});
-solve2(data);
+let p2 = solve2(data);
+// p2 !== 49
+console.log({p2});
