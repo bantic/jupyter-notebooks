@@ -71,6 +71,18 @@ let combinations2 = (arr) => {
   return out;
 }
 
+let allConnected = (g,group) => {
+  for (let i = 0; i < group.length; i++) {
+    let v = group[i];
+    if (group.slice(i+1).some(v2 => {
+      return !g.edges[v].has(v2);
+    })) {
+        return false;
+      }
+  }
+  return true;
+}
+
 let solve = data => {
   let g = parse(data);
   let is3Cycle = ([a,b,c]) => {
@@ -87,5 +99,27 @@ let solve = data => {
   return uniqT3Cycles.length;
 }
 
+let solve2 = data => {
+  let g = parse(data);
+  let skip = new Set();
+  let longest = [];
+
+  for (let n of g.nodes) {
+    let edges = Array.from(g.edges[n]);
+    let [a,...rest] = edges;
+    let group = [n,a];
+    let idx = 0;
+    while (allConnected(g,group) && idx < rest.length) {
+      longest = group.length > longest.length ? [...group] : longest;
+      idx++;
+      group.push(rest[idx]);
+    }
+  }
+
+  return longest.sort().join(',');
+}
+
 let p1 = solve(data);
 console.log({p1});
+let p2 = solve2(data);
+console.log({p2});
