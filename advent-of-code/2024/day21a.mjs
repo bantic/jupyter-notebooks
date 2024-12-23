@@ -45,9 +45,6 @@ let md = (v1,v2) => {
   assert(v1.length === v2.length);
   return sum(vecadd(vecmul(v1,-1),v2).map(Math.abs));
 }
-let uniq = arr => Array.from(new Set(arr));
-let reverseStr = str => str.split('').toReversed().join('');
-let sortStr = str => str.split('').toSorted().join('');
 let getPaths = (startBtn,endBtn,grid) => {
   if (startBtn === endBtn) return [''];
   let startPos = getPos(grid,startBtn);
@@ -86,16 +83,6 @@ getNPaths = memoize(getNPaths);
 let getDPaths = (startBtn,endBtn) => getPaths(startBtn,endBtn,DPAD_GRID);
 getDPaths = memoize(getDPaths);
 
-// for (let pair of ['A0','A2','A5','A7','25','20','62','26']) {
-//   let [a,b] = pair.split('');
-//   console.log(pair, getNPaths(a,b));
-// }
-
-// for (let pair of ['A<','A^','A>','Av','vA','<>','^v','<^']) {
-//   let [a,b] = pair.split('');
-//   console.log(pair, getDPaths(a,b));
-// }
-
 let getAllPaths = (dseq, idx=0, prev='A', curPath=[], paths=[]) => {
   if (idx === dseq.length) {
     paths.push(curPath);
@@ -107,10 +94,6 @@ let getAllPaths = (dseq, idx=0, prev='A', curPath=[], paths=[]) => {
   }
   return paths;
 }
-
-// console.log(getAllPaths('<A'));
-// console.log(getAllPaths('v<<A>>^A<AAvA<^AA>A<vAAA>^A'));
-// console.log(new Set(getAllPaths('v<<A>>^A<A>AvA<^AA>A<vAAA>^A').map(v => v.length)));
 
 let groupsByEnd = (str,end='A') => {
   let groups = [];
@@ -162,33 +145,11 @@ let solveCode = (code,depth) => {
   return total;
 }
 
-for (let args of [
-  ['<A',0],
-  ['<A',1],
-  ['<A',24],
-  ['v<<A',1],
-  ['>>^A',1],
-  ['^A',2]
-]) {
-  console.log(args, solveSeq(...args));
-}
-
-for (let code of [
-  '029A',
-  '980A',
-  '179A',
-  '456A',
-  '379A'
-]) {
-  console.log(code, solveCode(code,2));
-}
-
 let solve = (codes,depth=2) => {
   let total = 0;
   for (let code of codes) {
     let num = parseInt(code.match(/\d+/)[0], 10);
     let v = solveCode(code,depth);
-    console.log(code,num,v);
     total += num*v;
   }
   return total;
