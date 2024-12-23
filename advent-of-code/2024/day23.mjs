@@ -51,11 +51,7 @@ class Graph {
 
 let parse = data => {
   let g = new Graph();
-  let lines = data.split('\n');
-  for (let line of lines) {
-    let [a,b] = line.split('-');
-    g.addEdge(a,b);
-  }
+  let lines = data.split('\n').forEach(l => g.addEdge(...l.split('-')));
   return g;
 }
 
@@ -74,26 +70,22 @@ let combinations2 = (arr) => {
 let allConnected = (g,group) => {
   for (let i = 0; i < group.length; i++) {
     let v = group[i];
-    if (group.slice(i+1).some(v2 => {
-      return !g.edges[v].has(v2);
-    })) {
-        return false;
-      }
+    if (group.slice(i+1).some(v2 => !g.edges[v].has(v2))) return false;
   }
   return true;
 }
 
+let is3Cycle = (g, [a,b,c]) => {
+  return g.edges[a]?.has(b) && g.edges[a]?.has(c) && g.edges[b]?.has(c);
+};
+let get3Cycles = (g,n) => {
+  let combos = combinations2(Array.from(g.edges[n]));
+  return combos.filter(c => is3Cycle(g, [n,...c])).map(([a,b]) => [n,a,b].sort());
+};
+
 let solve = data => {
   let g = parse(data);
-  let is3Cycle = ([a,b,c]) => {
-    return g.edges[a]?.has(b) && g.edges[a]?.has(c) && g.edges[b]?.has(c);
-  };
-  let get3Cycles = n => {
-    let combos = combinations2(Array.from(g.edges[n]));
-    return combos.filter(c => is3Cycle([n,...c])).map(([a,b]) => [n,a,b].sort());
-  };
-
-  let all3Cycles = Object.keys(g.edges).flatMap(n => get3Cycles(n));
+  let all3Cycles = Object.keys(g.edges).flatMap(n => get3Cycles(g,n));
   let uniq3Cycles = Array.from(new Set(all3Cycles.map(c => JSON.stringify(c)))).map(v => JSON.parse(v));
   let uniqT3Cycles = uniq3Cycles.filter(arr => arr.some(v => v.startsWith('t')));
   return uniqT3Cycles.length;
@@ -101,7 +93,6 @@ let solve = data => {
 
 let solve2 = data => {
   let g = parse(data);
-  let skip = new Set();
   let longest = [];
 
   for (let n of g.nodes) {
