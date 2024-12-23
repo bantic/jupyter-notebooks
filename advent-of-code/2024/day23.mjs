@@ -71,53 +71,21 @@ let combinations2 = (arr) => {
   return out;
 }
 
-let combinations3 = (arr) => {
-  let out = [];
-  for (let i = 0; i < arr.length; i++) {
-    for (let j = i+1; j < arr.length; j++) {
-      for (let k = j+1; k < arr.length; k++) {
-        out.push(
-          [arr[i],arr[j],arr[k]]
-        );
-      }
-    }
-  }
-  return out;
-}
-
-// console.log(combinations2([1,2,3,4]));
-
 let solve = data => {
   let g = parse(data);
   let is3Cycle = ([a,b,c]) => {
     return g.edges[a]?.has(b) && g.edges[a]?.has(c) && g.edges[b]?.has(c);
   };
-  let is4Cycle = ([a,b,c,d]) => {
-    return g.edges[a]?.has(b) &&
-           g.edges[a]?.has(c) &&
-           g.edges[a]?.has(d) &&
-           g.edges[b]?.has(c) &&
-           g.edges[b]?.has(d) &&
-           g.edges[c]?.has(d);
-  };
   let get3Cycles = n => {
     let combos = combinations2(Array.from(g.edges[n]));
     return combos.filter(c => is3Cycle([n,...c])).map(([a,b]) => [n,a,b].sort());
   };
-  let get4Cycles = n => {
-    let combos = combinations3(Array.from(g.edges[n]));
-    return combos.filter(c => is4Cycle([n,...c])).map(([a,b,c]) => [n,a,b,c].sort());
-  };
 
   let all3Cycles = Object.keys(g.edges).flatMap(n => get3Cycles(n));
-  let all4Cycles = Object.keys(g.edges).flatMap(n => get4Cycles(n));
-  let uniq4Cycles = Array.from(new Set(all4Cycles.map(c => JSON.stringify(c)))).map(v => JSON.parse(v));
   let uniq3Cycles = Array.from(new Set(all3Cycles.map(c => JSON.stringify(c)))).map(v => JSON.parse(v));
-
   let uniqT3Cycles = uniq3Cycles.filter(arr => arr.some(v => v.startsWith('t')));
   return uniqT3Cycles.length;
 }
 
 let p1 = solve(data);
-// 2466 too high
 console.log({p1});
