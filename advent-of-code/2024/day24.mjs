@@ -48,13 +48,13 @@ let S = (wire, fnOrV) => {
 let parse = data => {
   let wires = new Set();
   let [ins,circuits] = data.split('\n\n');
-  ins = ins.split('\n').map(l => {
+  ins.split('\n').forEach(l => {
     let [wire,v] = l.split(': ');
     v = parseInt(v);
     wires.add(wire);
     S(wire, v);
   });
-  circuits = circuits.split('\n').map(l => {
+  circuits.split('\n').forEach(l => {
     let [in1,in2,out] = [...l.matchAll(/[a-z0-9]+/g)].map(m => m[0]);
     wires.add(in1);
     wires.add(in2);
@@ -66,19 +66,20 @@ let parse = data => {
   return wires;
 }
 
-let wires = parse(data);
+let solve = data => {
+  let wires = parse(data);
+  let zs = Array.from(wires).filter(w => w.startsWith('z'));
+  zs = zs.toSorted((a,b) => parseInt(a.slice(1)) - parseInt(b.slice(1)));
+  let bits = zs.map(z => {
+    return [z, parseInt(z.slice(1)), S(z).get()];
+  });
+  return bits.reduce((p1, [wire,num,bit]) => {
+    p1 += bit * Math.pow(2,num);
+    return p1;
+  }, 0);
+}
 
-let zs = Array.from(wires).filter(w => w.startsWith('z'));
-zs = zs.toSorted((a,b) => parseInt(a.slice(1)) - parseInt(b.slice(1)));
-let bits = zs.map(z => {
-  return [z, parseInt(z.slice(1)), S(z).get()];
-});
 
-let p1 = bits.reduce((p1, [wire,num,bit]) => {
-  p1 += bit * Math.pow(2,num);
-  return p1;
-}, 0);
 
+let p1 = solve(data);
 console.log({p1});
-
-debugger;
