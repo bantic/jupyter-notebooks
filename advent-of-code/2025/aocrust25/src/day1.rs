@@ -2,19 +2,22 @@ use crate::utils::fs;
 
 pub fn run() {
     let input = fs::read(1).expect("failed to read day 1");
-    let res = parse(&input);
-    dbg!(&res);
+    let p1 = p1(&input);
+    println!("p1 {p1}");
+}
+
+fn p1(input: &str) -> i16 {
+    let res = parse(input);
 
     let mut hits = 0;
     let mut start = 50;
     for (dir, amt) in res {
         start = turn(start, &dir, amt);
-        dbg!((start, dir, amt));
         if start == 0 {
             hits += 1;
         }
     }
-    println!("hits {hits}");
+    hits
 }
 
 #[derive(Debug)]
@@ -48,6 +51,23 @@ fn turn(start: i16, d: &Dir, amt: i16) -> i16 {
         res -= 100;
     }
     res
+}
+
+fn turn2(start: i16, d: &Dir, amt: i16) -> (i16, i8) {
+    let mut hits = 0;
+    let mut res = match d {
+        Dir::L => start - amt,
+        Dir::R => start + amt,
+    };
+    while res < 100 {
+        hits += 1;
+        res += 100;
+    }
+    while res >= 100 {
+        hits += 1;
+        res -= 100;
+    }
+    (res, hits)
 }
 
 #[cfg(test)]
