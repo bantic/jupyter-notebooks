@@ -1,6 +1,7 @@
 use crate::utils::fs;
 
 pub fn run() {
+    println!("Day 1");
     let input = fs::read(1).expect("failed to read day 1");
     let mut p1 = 0;
     let mut p2 = 0;
