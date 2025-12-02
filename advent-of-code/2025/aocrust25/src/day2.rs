@@ -11,6 +11,23 @@ fn solve(input: &str) -> i64 {
     invalids.iter().sum()
 }
 
+fn process(input: &str) -> Vec<i64> {
+    let mut invalids = vec![];
+    for piece in input.split(',') {
+        let mut nums = piece.split('-').map(|s| s.parse::<i64>().unwrap());
+        let min = nums.next().unwrap();
+        let max = nums.next().unwrap();
+        dbg!(piece, min, max);
+
+        for i in min..=max {
+            if is_invalid(i) {
+                invalids.push(i);
+            }
+        }
+    }
+    invalids
+}
+
 fn len_n(n: i64) -> u64 {
     (n as f64).log10().ceil() as u64
 }
@@ -49,23 +66,6 @@ fn test_lhs() {
 fn test_rhs() {
     assert_eq!(rhs(123500), 500);
     assert_eq!(rhs(1250), 50);
-}
-
-fn process(input: &str) -> Vec<i64> {
-    let mut invalids = vec![];
-    for piece in input.split(',') {
-        let mut nums = piece.split('-').map(|s| s.parse::<i64>().unwrap());
-        let min = nums.next().unwrap();
-        let max = nums.next().unwrap();
-        dbg!(piece, min, max);
-
-        for i in min..=max {
-            if is_invalid(i) {
-                invalids.push(i);
-            }
-        }
-    }
-    invalids
 }
 
 #[test]
