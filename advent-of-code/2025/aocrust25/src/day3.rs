@@ -30,9 +30,7 @@ fn solve_line(inp: &str, max_len: i64) -> i64 {
         let mut max = 0;
         let mut max_idx = 0;
 
-        #[allow(clippy::needless_range_loop)]
-        for i in start_idx..=end_idx {
-            let v = digits[i];
+        for (i, &v) in digits.iter().enumerate().take(end_idx + 1).skip(start_idx) {
             if v > max {
                 max = v;
                 max_idx = i;
@@ -75,15 +73,3 @@ fn test_solve_line_2() {
     assert_eq!(solve_line("234234234234278", 12), 434234234278);
     assert_eq!(solve_line("818181911112111", 12), 888911112111);
 }
-
-// 234234234234278 ->
-// 2342342342342,X,X -> 78
-// 23,X,2342342342,X,X -> 478
-// 23,X,23,X,2342342,X,X -> 4478
-// 23,X,23,X,23,X,23,X,2,X,X -> 444478
-// 23,X,23,X,23,X,23,X,X,X,X -> 4444278
-// 23,X,23,X,23,X,2,X,X,X,X,X -> 44434278
-// 23,X,23,X,23,X,X,X,X,X,X,X -> 444234278
-// 23,X,23,X,2,X,X,X,X,X,X,X,X -> 4434234278
-// 23,X,23,X,X,X,X,X,X,X,X,X,X -> 44234234278
-// 23,X,2,X,X,X,X,X,X,X,X,X,X,X -> 434234234278
