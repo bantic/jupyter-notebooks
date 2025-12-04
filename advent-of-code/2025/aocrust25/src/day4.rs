@@ -14,23 +14,19 @@ pub fn run() {
 type Pos = (usize, usize);
 
 fn find_removable(set: &HashSet<Pos>) -> HashSet<Pos> {
-    let mut to_rm = HashSet::new();
-
-    for &pos in set {
-        if set.get(&pos).is_some() {
-            let mut sum = 0;
-            for adj in adj8(&pos) {
-                if set.get(&adj).is_some() {
-                    sum += 1;
-                }
+    set.iter()
+        .filter_map(|pos| {
+            match adj8(pos)
+                .iter()
+                .filter_map(|adj| set.get(adj))
+                .collect::<Vec<_>>()
+                .len()
+            {
+                len if len < 4 => Some(*pos),
+                _ => None,
             }
-            if sum < 4 {
-                to_rm.insert(pos);
-            }
-        }
-    }
-
-    to_rm
+        })
+        .collect()
 }
 
 fn parse(inp: &str) -> HashSet<Pos> {
