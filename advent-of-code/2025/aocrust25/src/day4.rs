@@ -1,4 +1,5 @@
 use crate::utils::fs::read;
+use itertools::Itertools;
 use std::collections::HashSet;
 
 pub fn run() {
@@ -70,18 +71,16 @@ fn adj8(pos: &Pos) -> Vec<Pos> {
     let x = x as i64;
     let y = y as i64;
     let mut v = vec![];
-    for dx in -1..=1 {
-        for dy in -1..=1 {
-            if dx == dy && dx == 0 {
-                continue;
-            }
-            let x_ = x + dx;
-            let y_ = y + dy;
-            if x_ < 0 || y_ < 0 {
-                continue;
-            }
-            v.push((x_ as usize, y_ as usize));
+    for (dx, dy) in (-1..=1).cartesian_product(-1..=1) {
+        if dx == dy && dx == 0 {
+            continue;
         }
+        let x_ = x + dx;
+        let y_ = y + dy;
+        if x_ < 0 || y_ < 0 {
+            continue;
+        }
+        v.push((x_ as usize, y_ as usize));
     }
     v
 }
