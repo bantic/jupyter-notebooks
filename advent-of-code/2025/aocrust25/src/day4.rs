@@ -34,15 +34,15 @@ fn find_removable(set: &HashSet<Pos>) -> HashSet<Pos> {
 }
 
 fn parse(inp: &str) -> HashSet<Pos> {
-    let mut set = HashSet::new();
-    for (y, line) in inp.lines().enumerate() {
-        for (x, char) in line.chars().enumerate() {
-            if char == '@' {
-                set.insert((x, y));
-            }
-        }
-    }
-    set
+    inp.lines()
+        .enumerate()
+        .flat_map(|(y, line)| {
+            line.chars()
+                .enumerate()
+                .filter(|(_, c)| *c == '@')
+                .map(move |(x, _)| (x, y))
+        })
+        .collect()
 }
 
 fn solve(inp: &str, is_p1: bool) -> i64 {
@@ -70,19 +70,20 @@ fn adj8(pos: &Pos) -> Vec<Pos> {
     let &(x, y) = pos;
     let x = x as i64;
     let y = y as i64;
-    let mut v = vec![];
-    for (dx, dy) in (-1..=1).cartesian_product(-1..=1) {
-        if dx == dy && dx == 0 {
-            continue;
-        }
-        let x_ = x + dx;
-        let y_ = y + dy;
-        if x_ < 0 || y_ < 0 {
-            continue;
-        }
-        v.push((x_ as usize, y_ as usize));
-    }
-    v
+    (-1..=1)
+        .cartesian_product(-1..=1)
+        .filter_map(|(dx, dy)| {
+            if dx == 0 && dy == 0 {
+                None
+            } else {
+                match ((x + dx), (y + dy)) {
+                    (x_, _) if x_ < 0 => None,
+                    (_, y_) if y_ < 0 => None,
+                    (x_, y_) => Some((x_ as usize, y_ as usize)),
+                }
+            }
+        })
+        .collect()
 }
 
 #[test]
