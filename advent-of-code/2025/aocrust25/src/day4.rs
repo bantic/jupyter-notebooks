@@ -4,103 +4,72 @@ use std::collections::{HashMap, HashSet};
 pub fn run() {
     println!("day 4");
     let data = read(4).expect("failed to get data for day 4");
-    let p1 = solve(&data);
+    let p1 = solve(&data, true);
     println!("p1 {p1}");
-    let p2 = solve2(&data);
+    let p2 = solve(&data, false);
     println!("p2 {p2}");
 }
 
-#[derive(Debug)]
-enum Spot {
-    Empty,
-    Paper,
+type Pos = (usize, usize);
+
+fn find_removable(map: &HashMap<Pos, bool>) -> Vec<Pos> {
+    let mut set = HashSet::new();
+
+    for &pos in map.keys() {
+        if map.get(&pos).is_some() {
+            let mut sum = 0;
+            for adj in adj8(&pos) {
+                if map.get(&adj).is_some() {
+                    sum += 1;
+                }
+            }
+            if sum < 4 {
+                set.insert(pos);
+            }
+        }
+    }
+
+    set.into_iter().collect::<Vec<Pos>>()
 }
 
-fn solve2(inp: &str) -> i64 {
-    use Spot::*;
-
+fn parse(inp: &str) -> HashMap<Pos, bool> {
     let mut map = HashMap::new();
     for (y, line) in inp.lines().enumerate() {
         for (x, char) in line.chars().enumerate() {
             match char {
                 '@' => {
-                    map.insert((x, y), Paper);
+                    map.insert((x, y), true);
                 }
                 '.' => {}
                 _ => unreachable!("bad char {char}"),
             };
         }
     }
+    map
+}
 
-    let mut rem_count = 0i64;
+fn solve(inp: &str, is_p1: bool) -> i64 {
+    let map = parse(inp);
+    if is_p1 {
+        return find_removable(&map).len() as i64;
+    }
 
+    let mut rem_count = 0;
+    let mut map = map;
     loop {
-        let mut cur_marked = HashSet::new();
+        let removables = find_removable(&map);
 
-        for &pos in map.keys() {
-            if let Some(Paper) = map.get(&pos) {
-                let mut sum = 0;
-                for adj in adj8(&pos) {
-                    if let Some(Paper) = map.get(&adj) {
-                        sum += 1;
-                    }
-                }
-                if sum < 4 {
-                    cur_marked.insert(pos);
-                }
-            }
+        for to_rm in &removables {
+            map.remove(to_rm);
         }
+        rem_count += removables.len() as i64;
 
-        for marked in &cur_marked {
-            map.remove(marked);
-        }
-        rem_count += cur_marked.len() as i64;
-
-        if cur_marked.is_empty() {
+        if removables.is_empty() {
             break;
         }
     }
-
     rem_count
 }
-
-fn solve(inp: &str) -> i64 {
-    use Spot::*;
-
-    let mut map = HashMap::new();
-    for (y, line) in inp.lines().enumerate() {
-        for (x, char) in line.chars().enumerate() {
-            match char {
-                '@' => {
-                    map.insert((x, y), Paper);
-                }
-                '.' => {}
-                _ => unreachable!("bad char {char}"),
-            };
-        }
-    }
-
-    let mut p1 = 0;
-    for pos in map.keys() {
-        if let Some(Empty) = map.get(pos) {
-            continue;
-        }
-        let mut sum = 0;
-        for adj in adj8(pos) {
-            if let Some(Paper) = map.get(&adj) {
-                sum += 1;
-            }
-        }
-        if sum < 4 {
-            dbg!(pos.0, pos.1, sum);
-            p1 += 1;
-        }
-    }
-
-    p1
-}
-
-type Pos = (usize, usize);
 
 fn adj8(pos: &Pos) -> Vec<Pos> {
     let &(x, y) = pos;
@@ -157,5 +126,5 @@ fn test_1() {
 .@@@@@@@@.
 @.@.@@@.@.";
 
-    assert_eq!(solve(data), 13);
+    assert_eq!(solve(data, true), 13);
 }
