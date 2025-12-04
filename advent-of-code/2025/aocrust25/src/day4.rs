@@ -1,5 +1,5 @@
 use crate::utils::fs::read;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 pub fn run() {
     println!("day 4");
@@ -12,53 +12,47 @@ pub fn run() {
 
 type Pos = (usize, usize);
 
-fn find_removable(map: &HashMap<Pos, bool>) -> Vec<Pos> {
-    let mut set = HashSet::new();
+fn find_removable(set: &HashSet<Pos>) -> HashSet<Pos> {
+    let mut to_rm = HashSet::new();
 
-    for &pos in map.keys() {
-        if map.get(&pos).is_some() {
+    for &pos in set {
+        if set.get(&pos).is_some() {
             let mut sum = 0;
             for adj in adj8(&pos) {
-                if map.get(&adj).is_some() {
+                if set.get(&adj).is_some() {
                     sum += 1;
                 }
             }
             if sum < 4 {
-                set.insert(pos);
+                to_rm.insert(pos);
             }
         }
     }
 
-    set.into_iter().collect::<Vec<Pos>>()
+    to_rm
 }
 
-fn parse(inp: &str) -> HashMap<Pos, bool> {
-    let mut map = HashMap::new();
+fn parse(inp: &str) -> HashSet<Pos> {
+    let mut set = HashSet::new();
     for (y, line) in inp.lines().enumerate() {
         for (x, char) in line.chars().enumerate() {
-            match char {
-                '@' => {
-                    map.insert((x, y), true);
-                }
-                '.' => {}
-                _ => unreachable!("bad char {char}"),
-            };
+            if char == '@' {
+                set.insert((x, y));
+            }
         }
     }
-    map
+    set
 }
 
 fn solve(inp: &str, is_p1: bool) -> i64 {
-    let map = parse(inp);
+    let mut map = parse(inp);
     if is_p1 {
         return find_removable(&map).len() as i64;
     }
 
     let mut rem_count = 0;
-    let mut map = map;
     loop {
         let removables = find_removable(&map);
-
         for to_rm in &removables {
             map.remove(to_rm);
         }
