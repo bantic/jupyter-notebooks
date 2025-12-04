@@ -1,11 +1,13 @@
 use crate::utils::fs::read;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 pub fn run() {
     println!("day 4");
     let data = read(4).expect("failed to get data for day 4");
     let p1 = solve(&data);
     println!("p1 {p1}");
+    let p2 = solve2(&data);
+    println!("p2 {p2}");
 }
 
 #[derive(Debug)]
@@ -14,20 +16,67 @@ enum Spot {
     Paper,
 }
 
+fn solve2(inp: &str) -> i64 {
+    use Spot::*;
+
+    let mut map = HashMap::new();
+    for (y, line) in inp.lines().enumerate() {
+        for (x, char) in line.chars().enumerate() {
+            match char {
+                '@' => {
+                    map.insert((x, y), Paper);
+                }
+                '.' => {}
+                _ => unreachable!("bad char {char}"),
+            };
+        }
+    }
+
+    let mut rem_count = 0i64;
+
+    loop {
+        let mut cur_marked = HashSet::new();
+
+        for &pos in map.keys() {
+            if let Some(Paper) = map.get(&pos) {
+                let mut sum = 0;
+                for adj in adj8(&pos) {
+                    if let Some(Paper) = map.get(&adj) {
+                        sum += 1;
+                    }
+                }
+                if sum < 4 {
+                    cur_marked.insert(pos);
+                }
+            }
+        }
+
+        for marked in &cur_marked {
+            map.remove(marked);
+        }
+        rem_count += cur_marked.len() as i64;
+
+        if cur_marked.is_empty() {
+            break;
+        }
+    }
+
+    rem_count
+}
+
 fn solve(inp: &str) -> i64 {
     use Spot::*;
 
     let mut map = HashMap::new();
     for (y, line) in inp.lines().enumerate() {
         for (x, char) in line.chars().enumerate() {
-            map.insert(
-                (x, y),
-                match char {
-                    '.' => Empty,
-                    '@' => Paper,
-                    _ => unreachable!("bad char {char}"),
-                },
-            );
+            match char {
+                '@' => {
+                    map.insert((x, y), Paper);
+                }
+                '.' => {}
+                _ => unreachable!("bad char {char}"),
+            };
         }
     }
 
