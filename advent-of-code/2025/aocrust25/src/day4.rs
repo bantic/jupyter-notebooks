@@ -15,17 +15,12 @@ type Pos = (usize, usize);
 
 fn find_removable(set: &HashSet<Pos>) -> HashSet<Pos> {
     set.iter()
-        .filter_map(|pos| {
-            match adj8(pos)
-                .iter()
-                .filter_map(|adj| set.get(adj))
-                .collect::<Vec<_>>()
-                .len()
-            {
+        .filter_map(
+            |pos| match adj8(pos).iter().filter_map(|adj| set.get(adj)).count() {
                 len if len < 4 => Some(*pos),
                 _ => None,
-            }
-        })
+            },
+        )
         .collect()
 }
 
