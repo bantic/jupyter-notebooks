@@ -68,7 +68,11 @@ fn union(lhs: Option<IngRange>, rhs: IngRange) -> Vec<IngRange> {
 
             match (contains, is_overlapping) {
                 (true, _) => vec![lhs],
-                (_, true) => vec![*lhs.start().min(rhs.start())..=*lhs.end().max(rhs.end())],
+                (_, true) => {
+                    let &start = lhs.start().min(rhs.start());
+                    let &end = lhs.end().max(rhs.end());
+                    vec![start..=end]
+                }
                 (false, false) => vec![lhs, rhs],
             }
         }
