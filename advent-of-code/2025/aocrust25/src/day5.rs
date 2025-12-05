@@ -22,6 +22,7 @@ fn solve2(inp: &str) -> Answer {
     let mut ranges = inp.ranges;
 
     ranges.sort_by(|lhs, rhs| lhs.start().cmp(rhs.start()));
+    dbg!(&ranges);
 
     let ranges = ranges.iter().fold(Vec::new(), |mut acc, r| {
         let last = acc.pop();
@@ -29,6 +30,7 @@ fn solve2(inp: &str) -> Answer {
 
         acc
     });
+    dbg!(&ranges);
 
     ranges.into_iter().map(|r| r.count() as Answer).sum()
 }
@@ -45,21 +47,27 @@ fn union(
 
         if contains {
             return vec![lhs];
-        } else if !is_overlapping {
-            return vec![lhs, rhs];
+        } else if is_overlapping {
+            let &start = lhs.start().min(rhs.start());
+            let &end = lhs.end().max(rhs.end());
+            return vec![start..=end];
         } else {
-            let &lhs_min = lhs.start();
-            let &lhs_max = lhs.end().min(rhs.start());
-            let &rhs_min = lhs.end().max(rhs.start());
-            let &rhs_max = rhs.end();
+            return vec![lhs, rhs];
+            // let &lhs_min = lhs.start(); // 10
+            // let &lhs_max = lhs.end().min(rhs.start()); // 14 min 12 -> 12
+            // let &rhs_min = lhs.end().max(rhs.start()); // 14 max 12 -> 14
+            // let &rhs_max = rhs.end();
 
-            assert!(lhs_min <= lhs_max && lhs_max <= rhs_min && rhs_min <= rhs_max);
+            // // assert_eq!(union(Some(10..=14), 12..=18), vec![0..=18]);
+            // // [10..=12, 14..=18]
 
-            if rhs_min - lhs_max <= 1 {
-                return vec![lhs_min..=rhs_max];
-            }
+            // assert!(lhs_min <= lhs_max && lhs_max <= rhs_min && rhs_min <= rhs_max);
 
-            return vec![lhs_min..=lhs_max, rhs_min..=rhs_max];
+            // if rhs_min - lhs_max <= 1 {
+            //     return vec![lhs_min..=rhs_max];
+            // }
+
+            // return vec![lhs_min..=lhs_max, rhs_min..=rhs_max];
         }
     }
 
@@ -74,6 +82,8 @@ fn test_union() {
     assert_eq!(union(Some(0..=3), 0..=1), vec![0..=3]);
     assert_eq!(union(Some(0..=2), 2..=3), vec![0..=3]);
     assert_eq!(union(Some(0..=2), 3..=4), vec![0..=2, 3..=4]);
+    // [10..=12, 14..=18]
+    assert_eq!(union(Some(10..=14), 12..=18), vec![10..=18]);
 }
 
 fn solve1(inp: &str) -> Answer {
@@ -123,4 +133,21 @@ fn test_p1() {
 32";
 
     assert_eq!(solve1(inp), 3);
+}
+
+#[test]
+fn test_p2() {
+    let inp = r"3-5
+10-14
+16-20
+12-18
+
+1
+5
+8
+11
+17
+32";
+
+    assert_eq!(solve2(inp), 14);
 }
