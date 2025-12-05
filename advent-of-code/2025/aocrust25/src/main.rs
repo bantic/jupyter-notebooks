@@ -1,15 +1,12 @@
-#[allow(dead_code)]
-mod day1;
-mod day2;
-mod day3;
-mod day4;
-mod day5;
 mod utils;
+#[allow(dead_code)]
+mod y2025;
 
 fn main() {
-    // day1::run();
-    // day2::run();
-    // day3::run();
-    // day4::run();
+    use y2025::*;
+    day1::run();
+    day2::run();
+    day3::run();
+    day4::run();
     day5::run();
 }
