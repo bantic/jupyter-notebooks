@@ -7,7 +7,7 @@ type IngRange = RangeInclusive<Ingredient>;
 
 #[derive(Debug)]
 struct Input {
-    ranges: Vec<RangeInclusive<Ingredient>>,
+    ranges: Vec<IngRange>,
     ingredients: Vec<Ingredient>,
 }
 
@@ -22,7 +22,7 @@ pub fn run() {
 
 fn parse(inp: &str) -> Input {
     let (ranges, ingredients) = inp.split_once("\n\n").unwrap();
-    let ranges: Vec<RangeInclusive<Ingredient>> = ranges
+    let ranges: Vec<IngRange> = ranges
         .lines()
         .map(|line| {
             let (lhs, rhs) = line.split_once('-').unwrap();
