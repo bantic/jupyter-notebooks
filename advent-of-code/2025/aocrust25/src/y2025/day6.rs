@@ -1,13 +1,10 @@
 use crate::utils::fs::read_day_year;
 
-// p2 4451521054465 too low
-// p2 4456893221984 too low
-
 pub fn run() {
     println!("Day 6");
     let inp = read_day_year(6, 2025).unwrap();
-    // let p1 = solve(parse(&inp));
-    // println!("p1 {p1}");
+    let p1 = solve(parse(&inp));
+    println!("p1 {p1}");
     let p2 = solve2(&inp);
     println!("p2 {p2}");
 }
@@ -18,7 +15,7 @@ fn get_ops_w_widths(ops: &str) -> Vec<(usize, usize, Op)> {
     let ops: Vec<_> = ops.chars().collect();
 
     let mut cur_op = ops[0];
-    let mut cur_width: usize = 1;
+    let mut cur_width: usize = 0;
     let mut cur_op_idx = 0;
 
     for (idx, c) in ops.into_iter().enumerate().skip(1) {
@@ -26,13 +23,13 @@ fn get_ops_w_widths(ops: &str) -> Vec<(usize, usize, Op)> {
             cur_width += 1;
         } else {
             ret.push((cur_width, cur_op_idx, cur_op));
-            cur_width = 1;
+            cur_width = 0;
             cur_op = c;
             cur_op_idx = idx;
         }
     }
 
-    ret.push((cur_width, cur_op_idx, cur_op));
+    ret.push((cur_width + 1, cur_op_idx, cur_op));
 
     ret.iter()
         .map(|&(width, idx, op)| {
@@ -58,15 +55,6 @@ fn solve2(inp: &str) -> i64 {
         .iter()
         .flat_map(|line| line.chars())
         .collect::<Vec<_>>();
-    // let ops = ops
-    //     .chars()
-    //     .filter_map(|c| match c {
-    //         ' ' => None,
-    //         '*' => Some(Op::Mul),
-    //         '+' => Some(Op::Add),
-    //         _ => unreachable!(),
-    //     })
-    //     .collect::<Vec<_>>();
 
     ops_w_widths
         .iter()
@@ -74,18 +62,13 @@ fn solve2(inp: &str) -> i64 {
             let eq_args: Vec<i64> = (0..(nums.len()))
                 .skip(op_idx)
                 .take(op_width)
-                .filter_map(|n_idx| {
-                    let str = (n_idx..nums.len())
+                .map(|n_idx| {
+                    let col = (n_idx..nums.len())
                         .step_by(grid_width)
                         .take(num_height)
                         .map(|idx| nums[idx])
                         .collect::<String>();
-                    dbg!(n_idx, &str);
-                    let str = str.trim();
-                    match str.is_empty() {
-                        true => None,
-                        false => Some(str.parse::<i64>().unwrap()),
-                    }
+                    col.trim().parse::<i64>().unwrap()
                 })
                 .collect();
 
