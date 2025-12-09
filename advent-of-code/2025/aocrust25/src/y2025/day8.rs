@@ -6,9 +6,9 @@ use crate::utils::fs::read_day_year;
 pub fn run() {
     println!("Day 8");
     let inp = read_day_year(8, 2025).unwrap();
-    let p1 = solve1(&inp);
+    let p1 = solve(&inp, true);
     println!("p1 {p1}");
-    let p2 = solve2(&inp);
+    let p2 = solve(&inp, false);
     println!("p2 {p2}");
 }
 
@@ -18,77 +18,21 @@ fn dist((x1, y1, z1): P3, (x2, y2, z2): P3) -> f64 {
     (((x1 - x2) as f64).powi(2) + ((y1 - y2) as f64).powi(2) + ((z1 - z2) as f64).powi(2)).sqrt()
 }
 
-fn solve1(inp: &str) -> i64 {
+fn solve(inp: &str, is_part_1: bool) -> i64 {
     let p3s = parse(inp);
 
-    let mut dists: Vec<(f64, P3, P3)> = vec![];
-
-    for combo in p3s.iter().combinations(2) {
-        let p1 = combo[0];
-        let p2 = combo[1];
-        let d = dist(*p1, *p2);
-        dists.push((d, *p1, *p2));
-    }
-
-    dists.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
-    let sorted_pairs = dists.into_iter().map(|(_, p1, p2)| (p1, p2));
-
-    let mut circuits: Vec<HashSet<P3>> = p3s
-        .into_iter()
-        .map(|p| {
-            let mut circuit = HashSet::new();
-            circuit.insert(p);
-            circuit
+    let sorted_pairs: Vec<(P3, P3)> = p3s
+        .iter()
+        .combinations(2)
+        .map(|combo| {
+            let p1 = combo[0];
+            let p2 = combo[1];
+            let d = dist(*p1, *p2);
+            (d, p1, p2)
         })
+        .sorted_by(|a, b| a.0.partial_cmp(&b.0).unwrap())
+        .map(|(_, p1, p2)| (*p1, *p2))
         .collect();
-
-    let mut connections = 0;
-    for (p1, p2) in sorted_pairs {
-        let p1_circuit = match circuits.iter().position(|c| c.contains(&p1)) {
-            Some(p1_circuit_idx) => circuits.remove(p1_circuit_idx),
-            None => HashSet::new(),
-        };
-        let p2_circuit = match circuits.iter().position(|c| c.contains(&p2)) {
-            Some(p2_circuit_idx) => circuits.remove(p2_circuit_idx),
-            None => HashSet::new(),
-        };
-
-        let mut new_circuit: HashSet<P3> = HashSet::new();
-        for i in p1_circuit {
-            new_circuit.insert(i);
-        }
-        for i in p2_circuit {
-            new_circuit.insert(i);
-        }
-        circuits.push(new_circuit);
-        connections += 1;
-
-        if connections > 1000 {
-            break;
-        }
-    }
-
-    let lens = circuits.into_iter().map(|g| g.len()).sorted();
-
-    dbg!(&lens);
-    let lens = lens.into_iter().rev().take(3).collect::<Vec<_>>();
-    lens.iter().product::<usize>() as i64
-}
-
-fn solve2(inp: &str) -> i64 {
-    let p3s = parse(inp);
-
-    let mut dists: Vec<(f64, P3, P3)> = vec![];
-
-    for combo in p3s.iter().combinations(2) {
-        let p1 = combo[0];
-        let p2 = combo[1];
-        let d = dist(*p1, *p2);
-        dists.push((d, *p1, *p2));
-    }
-
-    dists.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
-    let sorted_pairs = dists.into_iter().map(|(_, p1, p2)| (p1, p2));
 
     let mut circuits: Vec<HashSet<P3>> = p3s
         .into_iter()
@@ -110,26 +54,34 @@ fn solve2(inp: &str) -> i64 {
             None => HashSet::new(),
         };
 
-        let mut new_circuit: HashSet<P3> = HashSet::new();
-        for i in p1_circuit {
-            new_circuit.insert(i);
-        }
-        for i in p2_circuit {
-            new_circuit.insert(i);
-        }
+        let new_circuit = p1_circuit
+            .union(&p2_circuit)
+            .copied()
+            .collect::<HashSet<_>>();
+
         circuits.push(new_circuit);
 
         connections.push((p1, p2));
 
-        if circuits.len() == 1 && circuits[0].len() == 1000 {
+        if (is_part_1 && connections.len() > 1000)
+            || (circuits.len() == 1 && circuits[0].len() == 1000)
+        {
             break;
         }
     }
 
-    let (p1, p2) = connections.last().unwrap();
-    dbg!(p1, p2);
-
-    p1.0 * p2.0
+    if is_part_1 {
+        circuits
+            .into_iter()
+            .map(|g| g.len())
+            .sorted()
+            .rev()
+            .take(3)
+            .product::<usize>() as i64
+    } else {
+        let (p1, p2) = connections.last().unwrap();
+        p1.0 * p2.0
+    }
 }
 
 fn parse(inp: &str) -> Vec<P3> {
