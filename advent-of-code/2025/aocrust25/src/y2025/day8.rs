@@ -31,7 +31,7 @@ fn solve(inp: &str, is_part_1: bool) -> i64 {
             (d, p1, p2)
         })
         .sorted_by(|a, b| a.0.partial_cmp(&b.0).unwrap())
-        .map(|(_, p1, p2)| (*p1, *p2))
+        .map(|(_, &p1, &p2)| (p1, p2))
         .collect();
 
     let mut circuits: Vec<HashSet<P3>> = p3s
@@ -47,11 +47,11 @@ fn solve(inp: &str, is_part_1: bool) -> i64 {
     for (p1, p2) in sorted_pairs {
         let p1_circuit = match circuits.iter().position(|c| c.contains(&p1)) {
             Some(p1_circuit_idx) => circuits.remove(p1_circuit_idx),
-            None => HashSet::new(),
+            None => HashSet::new(), // We never actually hit this, because we will always find a circuit for the point
         };
         let p2_circuit = match circuits.iter().position(|c| c.contains(&p2)) {
             Some(p2_circuit_idx) => circuits.remove(p2_circuit_idx),
-            None => HashSet::new(),
+            None => HashSet::new(), // We hit this if the p1_circuit contained p2; at this point it's removed from circuits
         };
 
         let new_circuit = p1_circuit
