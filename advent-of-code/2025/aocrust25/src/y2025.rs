@@ -5,6 +5,7 @@ mod day4;
 mod day5;
 mod day6;
 mod day7;
+mod day8;
 
 pub fn run(day: Option<i8>) {
     if let Some(day) = day {
@@ -17,6 +18,7 @@ pub fn run(day: Option<i8>) {
             5 => day5::run(),
             6 => day6::run(),
             7 => day7::run(),
+            8 => day8::run(),
             _ => unimplemented!(),
         }
     } else {
@@ -33,4 +35,5 @@ pub fn run_all() {
     day5::run();
     day6::run();
     day7::run();
+    day8::run();
 }
