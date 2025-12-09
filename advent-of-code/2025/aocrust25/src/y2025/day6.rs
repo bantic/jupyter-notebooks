@@ -151,5 +151,5 @@ fn test_2() {
   6 98  215 314
 *   +   *   +  ";
     dbg!(solve2(inp));
-    assert_eq!(0, 1);
+    assert_eq!(solve2(inp), 3263827);
 }
